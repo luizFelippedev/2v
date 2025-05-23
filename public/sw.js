@@ -1,14 +1,16 @@
 // public/sw.js
-const CACHE_NAME = 'portfolio-cache-v1.0.2';
+const CACHE_NAME = 'portfolio-cache-v1.0.3';
 const OFFLINE_URL = '/offline.html';
 
 // Recursos essenciais para pré-cache
 const PRECACHE_RESOURCES = [
   '/',
+  '/index.html',
   '/manifest.json',
   '/favicon.ico',
   '/offline.html',
-  '/icons/icon-192x192.png'
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
 ];
 
 // Middleware para verificar se a solicitação deve ser armazenada em cache
@@ -70,7 +72,7 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// Estratégia de busca em cache
+// Estratégia de busca em cache: Cache First, falling back to network
 self.addEventListener('fetch', (event) => {
   // Ignorar solicitações que não devem ser cacheadas
   if (!shouldCache(event.request)) return;
@@ -104,11 +106,22 @@ self.addEventListener('fetch', (event) => {
 
             return networkResponse;
           })
-          .catch(() => {
+          .catch((error) => {
             // Fallback para offline
+            console.log('[ServiceWorker] Fetch failed:', error);
+            
             if (event.request.headers.get('Accept')?.includes('text/html')) {
-              return caches.match(OFFLINE_URL) || new Response('Sem conexão', { status: 503 });
+              return caches.match(OFFLINE_URL);
             }
+            
+            // Se não for um pedido HTML, retorna um erro específico
+            return new Response('Sem conexão', { 
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
           });
       })
   );
@@ -116,11 +129,11 @@ self.addEventListener('fetch', (event) => {
 
 // Mensagens personalizadas
 self.addEventListener('message', (event) => {
-  if (event.data.type === 'SKIP_WAITING') {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 
-  if (event.data.type === 'CACHE_URLS') {
+  if (event.data && event.data.type === 'CACHE_URLS') {
     const urls = event.data.urls || [];
     
     caches.open(CACHE_NAME)
@@ -138,3 +151,69 @@ self.addEventListener('message', (event) => {
 self.addEventListener('error', (event) => {
   console.error('[ServiceWorker] Unhandled error:', event);
 });
+
+// Evento para escutar atualizações
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+// Estratégia para sincronização offline
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-data') {
+    event.waitUntil(syncData());
+  }
+});
+
+// Implementação básica de sincronização
+async function syncData() {
+  // Esta função seria implementada para sincronizar dados
+  // que foram armazenados localmente enquanto o usuário estava offline
+  console.log('[ServiceWorker] Syncing data');
+  // Por exemplo: buscar todos os posts de um IndexedDB e enviá-los para o servidor
+}
+
+// Manipulador de notificações push
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  const data = event.data.json();
+  
+  const title = data.title || 'Notificação';
+  const options = {
+    body: data.body || 'Você tem uma nova notificação',
+    icon: data.icon || '/icons/icon-192x192.png',
+    badge: data.badge || '/icons/notification-badge.png',
+    data: data.data || {},
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// Manipulador de cliques em notificações
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  // Se a notificação tiver dados com uma URL, navegar para essa URL
+  if (event.notification.data && event.notification.data.url) {
+    event.waitUntil(
+      clients.openWindow(event.notification.data.url)
+    );
+  } else {
+    // Caso contrário, abrir a janela principal do aplicativo
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then(windowClients => {
+        // Se já existe uma janela aberta, focar nela
+        for (let client of windowClients) {
+          if (client.url.includes('/') && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // Caso contrário, abrir uma nova janela
+        if (clients.openWindow) {
+          return clients.openWindow('/');
+        }
+      })
+    );
+  }

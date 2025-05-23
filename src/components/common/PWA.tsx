@@ -1,196 +1,69 @@
 // src/components/common/PWA.tsx
-import React, { FC, useEffect, useState } from "react";
+import React, { FC } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Download, 
   X, 
   Smartphone, 
-  Monitor 
+  Monitor,
+  Zap 
 } from "lucide-react";
-
-// Interface para o evento de instalação do PWA
-interface PWAInstallPrompt extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-// Hook para reutilização das funcionalidades do PWA
-export const usePWA = () => {
-  const [isInstalled, setIsInstalled] = useState<boolean>(false);
-  const [isOnline, setIsOnline] = useState<boolean>(true);
-
-  useEffect(() => {
-    const checkInstallStatus = () => {
-      setIsInstalled(
-        window.matchMedia('(display-mode: standalone)').matches || 
-        (navigator as any).standalone === true
-      );
-      setIsOnline(navigator.onLine);
-    };
-
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    checkInstallStatus();
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  return { isInstalled, isOnline };
-};
+import { usePWA } from "@/hooks/usePWA";
 
 // Componente PWA
 export const PWA: FC = () => {
-  // Estados com tipagem explícita
-  const [deferredPrompt, setDeferredPrompt] = useState<PWAInstallPrompt | null>(null);
-  const [showInstallPrompt, setShowInstallPrompt] = useState<boolean>(false);
-  const [isInstalled, setIsInstalled] = useState<boolean>(false);
-  const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [updateAvailable, setUpdateAvailable] = useState<boolean>(false);
-  const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const { 
+    isInstalled,
+    isInstallable,
+    isOnline,
+    updateAvailable,
+    deferredPrompt,
+    promptInstall,
+    dismissInstall,
+    applyUpdate
+  } = usePWA();
 
-  // Função para registrar o Service Worker
-  const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
-    // Verifica se já está registrado ou se não suporta Service Worker
-    if (isRegistered || !('serviceWorker' in navigator)) return null;
+  // Estado para controlar a exibição do prompt de instalação
+  const [showInstallPrompt, setShowInstallPrompt] = React.useState<boolean>(false);
 
-    try {
-      // Tenta obter registro existente
-      const existingRegistration = await navigator.serviceWorker.getRegistration('/');
-      
-      if (existingRegistration) {
-        console.log('ServiceWorker already registered', existingRegistration);
-        setIsRegistered(true);
-        return existingRegistration;
-      }
-
-      // Registra novo Service Worker
-      const registration = await navigator.serviceWorker.register('/sw.js', { 
-        scope: '/' 
-      });
-
-      console.log('ServiceWorker registration successful', registration);
-      setIsRegistered(true);
-
-      // Verificar atualizações
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              setUpdateAvailable(true);
-            }
-          });
-        }
-      });
-
-      return registration;
-    } catch (error) {
-      console.error('ServiceWorker registration failed:', error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    // Verificação de suporte e registro do Service Worker
-    registerServiceWorker();
-
-    // Verificar estado de instalação do PWA
-    const checkPWAInstallStatus = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches || 
-          (navigator as any).standalone === true) {
-        setIsInstalled(true);
-      }
-    };
-
-    // Configurar evento de instalação
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Importante: Apenas previne o comportamento padrão se quiser adiar
-      e.preventDefault();
-      
-      // Armazena o evento para uso posterior
-      setDeferredPrompt(e as PWAInstallPrompt);
-      
-      // Mostra prompt de instalação após um tempo
-      setTimeout(() => {
-        if (!isInstalled && !localStorage.getItem('pwa-install-dismissed')) {
-          setShowInstallPrompt(true);
-        }
+  // Verificar se deve mostrar o prompt com base nas condições
+  React.useEffect(() => {
+    if (isInstallable && deferredPrompt && !isInstalled && !localStorage.getItem('pwa-install-dismissed')) {
+      // Atrasar o prompt para não interromper imediatamente a experiência do usuário
+      const timer = setTimeout(() => {
+        setShowInstallPrompt(true);
       }, 30000);
-    };
-
-    // Eventos de online/offline
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    // Registrar eventos
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Executa verificações iniciais
-    checkPWAInstallStatus();
-
-    // Limpar eventos
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [isInstalled]);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isInstallable, deferredPrompt, isInstalled]);
 
   // Função para lidar com a instalação do PWA
   const handleInstall = async () => {
-    if (!deferredPrompt) {
-      console.warn('Não há prompt de instalação disponível');
-      return;
+    const success = await promptInstall();
+    
+    if (success) {
+      console.log('Instalação aceita');
+      localStorage.setItem('pwa-installed', 'true');
+    } else {
+      console.log('Instalação cancelada');
+      localStorage.setItem('pwa-install-dismissed', 'true');
     }
-
-    try {
-      // Mostra o prompt de instalação
-      await deferredPrompt.prompt();
-      
-      // Espera a escolha do usuário
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        console.log('Instalação aceita');
-        setIsInstalled(true);
-        localStorage.setItem('pwa-installed', 'true');
-      } else {
-        console.log('Instalação cancelada');
-        localStorage.setItem('pwa-install-dismissed', 'true');
-      }
-    } catch (error) {
-      console.error('Erro durante a instalação:', error);
-    } finally {
-      // Limpa o prompt
-      setDeferredPrompt(null);
-      setShowInstallPrompt(false);
-    }
-  };
-
-  // Função para atualizar o Service Worker
-  const handleUpdate = () => {
-    navigator.serviceWorker.getRegistration().then((registration) => {
-      if (registration?.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-        window.location.reload();
-      }
-    });
+    
+    setShowInstallPrompt(false);
   };
 
   // Função para descartar o prompt de instalação
   const handleDismiss = () => {
     localStorage.setItem('pwa-install-dismissed', 'true');
     setShowInstallPrompt(false);
-    setDeferredPrompt(null);
+    dismissInstall();
+  };
+
+  // Função para tratar atualizações
+  const handleUpdate = () => {
+    applyUpdate();
+    setUpdateAvailable(false);
   };
 
   return (
@@ -247,15 +120,15 @@ export const PWA: FC = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-900 p-5 rounded-lg shadow-xl max-w-sm border dark:border-gray-700"
+            className="fixed bottom-4 right-4 z-50 bg-black/80 dark:bg-gray-900 p-5 rounded-lg shadow-xl max-w-sm border border-white/20 dark:border-gray-700"
           >
             <div className="flex gap-4">
               <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-purple-500">
                 {window.innerWidth < 768 ? <Smartphone className="text-white" /> : <Monitor className="text-white" />}
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold">Instalar Portfolio</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <h3 className="text-lg font-semibold text-white">Instalar Portfolio</h3>
+                <p className="text-sm text-gray-300">
                   Instale o site como app para melhor desempenho e acesso offline.
                 </p>
                 <div className="flex mt-3 gap-3">
@@ -267,7 +140,7 @@ export const PWA: FC = () => {
                   </button>
                   <button 
                     onClick={handleDismiss} 
-                    className="text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                    className="text-sm text-gray-400 hover:text-gray-200"
                   >
                     Agora não
                   </button>
@@ -275,7 +148,7 @@ export const PWA: FC = () => {
               </div>
               <button 
                 onClick={handleDismiss} 
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                className="text-gray-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
