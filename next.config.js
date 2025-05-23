@@ -1,67 +1,83 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  swcMinify: true,
+  // Environment variables for client-side
+  env: {
+    CUSTOM_KEY: 'portfolio-value',
+    NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+  },
+  
+  // Images configuration
   images: {
     domains: [
+      'picsum.photos',
+      'via.placeholder.com',
+      'ui-avatars.com',
       'localhost',
-      'res.cloudinary.com',
-      'images.unsplash.com',
-      'api.placeholder.com' // Mantenha se você planeja usar um serviço externo de placeholder
     ],
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ['image/webp'],
   },
-  experimental: {
-    serverActions: true,
-  },
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
+  
+  // Add support for service worker
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/sw.js',
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
           },
+        ],
+      },
+      {
+        source: '/(.*)',
+        headers: [
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
           {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            key: 'X-Frame-Options', 
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
           },
         ],
       },
     ];
   },
-  async rewrites() {
+  
+  // Experimental features
+  experimental: {
+    // Server Actions are enabled by default in Next.js 14
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+  
+  // Redirects
+  async redirects() {
     return [
       {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`, // Isso usa a variável do .env.local
+        source: '/placeholder/:width/:height',
+        destination: '/api/placeholder/:width/:height',
+        permanent: true,
       },
     ];
   },
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Bundle analyzer
-    if (process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-      config.plugins.push(
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
-          openAnalyzer: false,
-        })
-      );
-    }
-
-    return config;
-  },
+  
+  // Output settings
+  output: 'standalone',
+  
+  // Disable React StrictMode if causing issues with animations
+  // reactStrictMode: false,
+  
+  // Trailing slash settings
+  trailingSlash: false,
+  
+  // Powered by header
+  poweredByHeader: false,
 };
 
 module.exports = nextConfig;
