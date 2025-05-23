@@ -1,12 +1,8 @@
-// src/components/common/PWA.tsx
-import React, { FC, useEffect, useState } from "react";
+// src/components/common/PWAManager.tsx
+"use client";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Download, 
-  X, 
-  Smartphone, 
-  Monitor 
-} from "lucide-react";
+import { Download, X, Smartphone, Monitor } from "lucide-react";
 
 // Interface para o evento de instalação do PWA
 interface PWAInstallPrompt extends Event {
@@ -14,39 +10,7 @@ interface PWAInstallPrompt extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-// Hook para reutilização das funcionalidades do PWA
-export const usePWA = () => {
-  const [isInstalled, setIsInstalled] = useState<boolean>(false);
-  const [isOnline, setIsOnline] = useState<boolean>(true);
-
-  useEffect(() => {
-    const checkInstallStatus = () => {
-      setIsInstalled(
-        window.matchMedia('(display-mode: standalone)').matches || 
-        (navigator as any).standalone === true
-      );
-      setIsOnline(navigator.onLine);
-    };
-
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    checkInstallStatus();
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  return { isInstalled, isOnline };
-};
-
-// Componente PWA
-export const PWA: FC = () => {
+export const PWAManager: React.FC = () => {
   // Estados com tipagem explícita
   const [deferredPrompt, setDeferredPrompt] = useState<PWAInstallPrompt | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState<boolean>(false);
@@ -285,4 +249,35 @@ export const PWA: FC = () => {
       </AnimatePresence>
     </>
   );
+};
+
+// Hook para reutilização das funcionalidades do PWA
+export const usePWA = () => {
+  const [isInstalled, setIsInstalled] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkInstallStatus = () => {
+      setIsInstalled(
+        window.matchMedia('(display-mode: standalone)').matches || 
+        (navigator as any).standalone === true
+      );
+      setIsOnline(navigator.onLine);
+    };
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    checkInstallStatus();
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return { isInstalled, isOnline };
 };

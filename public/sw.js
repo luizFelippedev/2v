@@ -1,207 +1,140 @@
 // public/sw.js
+const CACHE_NAME = 'portfolio-cache-v1.0.2';
+const OFFLINE_URL = '/offline.html';
 
-// Service worker version for cache busting
-const CACHE_VERSION = 'v1.0.1';
-const CACHE_NAME = `portfolio-cache-${CACHE_VERSION}`;
-
-// Resources to pre-cache (only include resources that definitely exist)
+// Recursos essenciais para pré-cache
 const PRECACHE_RESOURCES = [
   '/',
   '/manifest.json',
   '/favicon.ico',
-  '/apple-icon.png',
-  '/offline.html'
+  '/offline.html',
+  '/icons/icon-192x192.png'
 ];
 
-// Install event - precache important resources
-self.addEventListener('install', event => {
-  console.log('[ServiceWorker] Installing new version:', CACHE_VERSION);
+// Middleware para verificar se a solicitação deve ser armazenada em cache
+function shouldCache(request) {
+  const url = new URL(request.url);
   
-  // Skip waiting to ensure the new service worker activates immediately
-  self.skipWaiting();
+  // Ignorar URLs não HTTP(S)
+  if (!url.protocol.startsWith('http')) return false;
+
+  // Ignorar solicitações de API
+  if (url.pathname.startsWith('/api/')) return false;
+
+  // Ignorar rotas administrativas
+  if (url.pathname.startsWith('/admin/')) return false;
+
+  // Ignorar recursos de desenvolvimento
+  if (url.pathname.includes('_next/webpack-hmr')) return false;
+
+  return true;
+}
+
+// Evento de instalação - pré-cache recursos
+self.addEventListener('install', (event) => {
+  console.log('[ServiceWorker] Installing');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[ServiceWorker] Pre-caching resources');
-        // Cache resources individually to handle failures gracefully
-        return Promise.allSettled(
-          PRECACHE_RESOURCES.map(url => 
-            cache.add(url).catch(err => {
-              console.warn(`[ServiceWorker] Failed to cache ${url}:`, err);
-              return null;
-            })
-          )
-        );
+      .then((cache) => {
+        console.log('[ServiceWorker] Precaching resources');
+        return cache.addAll(PRECACHE_RESOURCES.map(url => new Request(url, { cache: 'no-cache' })));
       })
-      .catch(err => {
-        console.error('[ServiceWorker] Install failed:', err);
+      .catch((error) => {
+        console.error('[ServiceWorker] Precaching failed:', error);
       })
   );
+
+  // Ativa o novo service worker imediatamente
+  self.skipWaiting();
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', event => {
-  console.log('[ServiceWorker] Activate');
-  
-  // Take control of all clients immediately
-  event.waitUntil(clients.claim());
-  
-  // Remove old caches
+// Evento de ativação - limpar caches antigos
+self.addEventListener('activate', (event) => {
+  console.log('[ServiceWorker] Activating');
+
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter(cacheName => {
-          return cacheName.startsWith('portfolio-cache-') && cacheName !== CACHE_NAME;
-        }).map(cacheName => {
-          console.log('[ServiceWorker] Removing old cache:', cacheName);
-          return caches.delete(cacheName);
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('[ServiceWorker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
         })
       );
     })
   );
+
+  // Assume o controle imediato de todas as páginas
+  return self.clients.claim();
 });
 
-// Function to determine if a request is cacheable
-function isCacheableRequest(request) {
-  try {
-    const url = new URL(request.url);
-    
-    // Skip non-HTTP(S) protocols (chrome-extension, file, etc.)
-    if (!url.protocol.startsWith('http')) {
-      return false;
-    }
-    
-    // Only cache same-origin requests
-    if (url.origin !== self.location.origin) {
-      return false;
-    }
-    
-    // Skip API requests with query parameters (they're likely dynamic)
-    if (url.pathname.startsWith('/api/') && url.search) {
-      return false;
-    }
-    
-    // Skip authentication related URLs
-    if (url.pathname.includes('auth') || url.search.includes('token=')) {
-      return false;
-    }
-    
-    // Skip Next.js internal routes
-    if (url.pathname.startsWith('/_next/webpack-hmr') || 
-        url.pathname.startsWith('/_next/static/chunks/webpack')) {
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.warn('[ServiceWorker] Error parsing URL:', request.url, error);
-    return false;
-  }
-}
+// Estratégia de busca em cache
+self.addEventListener('fetch', (event) => {
+  // Ignorar solicitações que não devem ser cacheadas
+  if (!shouldCache(event.request)) return;
 
-// Fetch event - serve from cache or network
-self.addEventListener('fetch', event => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
-  
-  // Check if the request should be cached
-  if (!isCacheableRequest(event.request)) {
-    return;
-  }
-  
-  // Cache-first strategy for static assets
   event.respondWith(
     caches.match(event.request)
-      .then(cachedResponse => {
-        // Return cached response if available
-        if (cachedResponse) {
-          return cachedResponse;
+      .then((response) => {
+        // Cache hit - retorna resposta do cache
+        if (response) {
+          return response;
         }
-        
-        // Otherwise, fetch from network
+
+        // Busca na rede, atualiza cache
         return fetch(event.request)
-          .then(response => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+          .then((networkResponse) => {
+            // Verifica se a resposta é válida para cache
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
             }
+
+            // Clona a resposta para cache
+            const responseToCache = networkResponse.clone();
             
-            // Clone the response
-            const responseToCache = response.clone();
-            
-            // Store in cache (handle errors gracefully)
             caches.open(CACHE_NAME)
-              .then(cache => {
-                return cache.put(event.request, responseToCache);
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
               })
-              .catch(err => {
-                console.warn('[ServiceWorker] Cache put error for', event.request.url, ':', err);
+              .catch((error) => {
+                console.warn('[ServiceWorker] Cache update failed:', error);
               });
-            
-            return response;
+
+            return networkResponse;
           })
-          .catch(error => {
-            console.warn('[ServiceWorker] Fetch error for', event.request.url, ':', error);
-            
-            // For HTML pages, try to return a cached version or offline page
+          .catch(() => {
+            // Fallback para offline
             if (event.request.headers.get('Accept')?.includes('text/html')) {
-              return caches.match('/') || caches.match('/offline.html');
+              return caches.match(OFFLINE_URL) || new Response('Sem conexão', { status: 503 });
             }
-            
-            // For other resources, just throw the error
-            throw error;
           });
-      })
-      .catch(error => {
-        console.error('[ServiceWorker] Cache match error:', error);
-        return fetch(event.request);
       })
   );
 });
 
-// Handle messages from clients
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+// Mensagens personalizadas
+self.addEventListener('message', (event) => {
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
-  if (event.data && event.data.type === 'CACHE_URLS') {
+
+  if (event.data.type === 'CACHE_URLS') {
     const urls = event.data.urls || [];
     
-    // Filter cacheable URLs
-    const cacheableUrls = urls.filter(url => {
-      try {
-        return isCacheableRequest({ url });
-      } catch {
-        return false;
-      }
-    });
-    
-    if (cacheableUrls.length > 0) {
-      console.log('[ServiceWorker] Caching URLs from message:', cacheableUrls);
-      
-      event.waitUntil(
-        caches.open(CACHE_NAME)
-          .then(cache => {
-            return Promise.allSettled(
-              cacheableUrls.map(url => 
-                cache.add(url).catch(err => {
-                  console.warn(`[ServiceWorker] Failed to cache ${url}:`, err);
-                  return null;
-                })
-              )
-            );
-          })
-      );
-    }
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        return Promise.all(
+          urls.map(url => 
+            cache.add(url).catch(err => console.warn(`Failed to cache ${url}:`, err))
+          )
+        );
+      });
   }
 });
 
-// Error handling for unhandled promise rejections
-self.addEventListener('unhandledrejection', event => {
-  console.error('[ServiceWorker] Unhandled promise rejection:', event.reason);
-  event.preventDefault();
+// Log de erros não tratados
+self.addEventListener('error', (event) => {
+  console.error('[ServiceWorker] Unhandled error:', event);
 });
