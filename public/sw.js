@@ -1,5 +1,5 @@
 // public/sw.js
-const CACHE_NAME = 'portfolio-cache-v1.0.3';
+const CACHE_NAME = 'portfolio-cache-v1.0.4';
 const OFFLINE_URL = '/offline.html';
 
 // Recursos essenciais para pré-cache
@@ -217,3 +217,4 @@ self.addEventListener('notificationclick', (event) => {
       })
     );
   }
+});

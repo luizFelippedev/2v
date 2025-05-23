@@ -78,7 +78,7 @@ export function RegisterSW({ onSuccess, onUpdate, onError }: RegisterSWProps = {
       }
     };
 
-    // Registrar quando a página for carregada
+    // Registrar quando a página for carregada completamente
     window.addEventListener('load', registerSW);
 
     // Cleanup

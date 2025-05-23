@@ -1,12 +1,14 @@
 // src/components/common/PWA.tsx
-import React, { FC } from "react";
+"use client";
+import React, { FC, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Download, 
   X, 
   Smartphone, 
   Monitor,
-  Zap 
+  Zap,
+  BellRing
 } from "lucide-react";
 import { usePWA } from "@/hooks/usePWA";
 
@@ -24,10 +26,12 @@ export const PWA: FC = () => {
   } = usePWA();
 
   // Estado para controlar a exibição do prompt de instalação
-  const [showInstallPrompt, setShowInstallPrompt] = React.useState<boolean>(false);
+  const [showInstallPrompt, setShowInstallPrompt] = useState<boolean>(false);
+  // Estado para controlar a exibição do banner de atualização
+  const [showUpdateBanner, setShowUpdateBanner] = useState<boolean>(false);
 
   // Verificar se deve mostrar o prompt com base nas condições
-  React.useEffect(() => {
+  useEffect(() => {
     if (isInstallable && deferredPrompt && !isInstalled && !localStorage.getItem('pwa-install-dismissed')) {
       // Atrasar o prompt para não interromper imediatamente a experiência do usuário
       const timer = setTimeout(() => {
@@ -37,6 +41,11 @@ export const PWA: FC = () => {
       return () => clearTimeout(timer);
     }
   }, [isInstallable, deferredPrompt, isInstalled]);
+
+  // Atualizar o estado do banner quando houver uma atualização disponível
+  useEffect(() => {
+    setShowUpdateBanner(updateAvailable);
+  }, [updateAvailable]);
 
   // Função para lidar com a instalação do PWA
   const handleInstall = async () => {
@@ -63,7 +72,7 @@ export const PWA: FC = () => {
   // Função para tratar atualizações
   const handleUpdate = () => {
     applyUpdate();
-    setUpdateAvailable(false);
+    setShowUpdateBanner(false);
   };
 
   return (
@@ -87,7 +96,7 @@ export const PWA: FC = () => {
 
       {/* Update Banner */}
       <AnimatePresence>
-        {updateAvailable && (
+        {showUpdateBanner && (
           <motion.div
             initial={{ y: -100 }}
             animate={{ y: 0 }}
@@ -95,6 +104,7 @@ export const PWA: FC = () => {
             className="fixed top-0 left-0 right-0 z-50 bg-blue-500 text-white py-3 px-4 text-center"
           >
             <div className="flex items-center justify-center gap-3">
+              <BellRing className="w-5 h-5" />
               <span>Nova versão disponível!</span>
               <button 
                 onClick={handleUpdate} 
@@ -103,7 +113,7 @@ export const PWA: FC = () => {
                 Atualizar
               </button>
               <button 
-                onClick={() => setUpdateAvailable(false)} 
+                onClick={() => setShowUpdateBanner(false)} 
                 className="hover:bg-blue-600 p-1 rounded"
               >
                 <X className="w-4 h-4" />

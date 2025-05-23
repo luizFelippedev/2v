@@ -1,4 +1,4 @@
-// app/layout.tsx
+// src/app/layout.tsx (modificado)
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
@@ -12,6 +12,7 @@ import { PWA } from "@/components/common/PWA";
 import { NoSSR } from "@/components/common/NoSSR";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { GlobalSearch } from "@/components/common/GlobalSearch";
+import { RegisterSW } from "@/components/common/RegisterSW";
 
 // Configuração da fonte
 const inter = Inter({
@@ -170,13 +171,26 @@ export default function RootLayout({
               {/* Análises */}
               <Analytics />
               
-              {/* PWA */}
+              {/* Componente PWA */}
               <PWA />
+              
+              {/* Registro do Service Worker */}
+              <RegisterSW 
+                onSuccess={(registration) => {
+                  console.log('Service Worker registrado com sucesso:', registration);
+                }} 
+                onUpdate={(registration) => {
+                  console.log('Nova versão disponível, atualizando...', registration);
+                }}
+                onError={(error) => {
+                  console.error('Erro ao registrar Service Worker:', error);
+                }}
+              />
             </NoSSR>
           </AppProviders>
         </ErrorBoundary>
 
-        {/* Script de suporte a PWA */}
+        {/* Script de suporte a PWA - Fallback para o componente RegisterSW */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

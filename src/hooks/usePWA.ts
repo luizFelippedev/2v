@@ -39,31 +39,35 @@ export function usePWA(): UsePWAReturn {
     };
 
     // Verificar inicialmente
-    checkInstallState();
+    if (typeof window !== 'undefined') {
+      checkInstallState();
 
-    // Verificar novamente se houver mudança no modo de exibição
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    const listener = () => checkInstallState();
-    
-    // Usar método moderno se disponível
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', listener);
-    } else {
-      // Fallback para navegadores mais antigos
-      (mediaQuery as any).addListener(listener);
-    }
-
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', listener);
+      // Verificar novamente se houver mudança no modo de exibição
+      const mediaQuery = window.matchMedia('(display-mode: standalone)');
+      const listener = () => checkInstallState();
+      
+      // Usar método moderno se disponível
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', listener);
       } else {
-        (mediaQuery as any).removeListener(listener);
+        // Fallback para navegadores mais antigos
+        (mediaQuery as any).addListener(listener);
       }
-    };
+
+      return () => {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener('change', listener);
+        } else {
+          (mediaQuery as any).removeListener(listener);
+        }
+      };
+    }
   }, []);
 
   // Monitorar status de online/offline
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -82,6 +86,8 @@ export function usePWA(): UsePWAReturn {
 
   // Capturar evento beforeinstallprompt para permitir instalação personalizada
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleBeforeInstallPrompt = (e: Event) => {
       // Prevenir o prompt automático
       e.preventDefault();
@@ -112,6 +118,9 @@ export function usePWA(): UsePWAReturn {
 
   // Monitorar atualizações do service worker
   useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+
+    // Verifica se o navegador suporta serviceWorker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
         registration.addEventListener('updatefound', () => {
@@ -126,6 +135,13 @@ export function usePWA(): UsePWAReturn {
             }
           });
         });
+      });
+
+      // Escutar mensagens de atualização do service worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+          setUpdateAvailable(true);
+        }
       });
     }
   }, []);
@@ -168,7 +184,7 @@ export function usePWA(): UsePWAReturn {
 
   // Verificar se há atualizações disponíveis
   const checkForUpdates = useCallback(async (): Promise<boolean> => {
-    if (!('serviceWorker' in navigator)) {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       return false;
     }
 
@@ -192,7 +208,7 @@ export function usePWA(): UsePWAReturn {
 
   // Aplicar atualização disponível
   const applyUpdate = useCallback(() => {
-    if (!('serviceWorker' in navigator)) {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       return;
     }
 
