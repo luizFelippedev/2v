@@ -1,124 +1,46 @@
-{
-  "name": "Luiz Felippe - Portfolio",
-  "short_name": "LF Portfolio",
-  "description": "Portfolio profissional de Luiz Felippe - Desenvolvedor Full Stack especializado em React, Node.js e IA",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
-  "orientation": "any",
-  "scope": "/",
-  "lang": "pt-BR",
-  "categories": ["portfolio", "developer", "technology"],
-  "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-home.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Página inicial no desktop"
-    },
-    {
-      "src": "/screenshots/mobile-home.png",
-      "sizes": "360x640",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "Página inicial no mobile"
-    }
-  ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://luizfelippe.dev/manifest.json"
-    }
-  ],
-  "prefer_related_applications": false,
-  "shortcuts": [
-    {
-      "name": "Projetos",
-      "short_name": "Projetos",
-      "description": "Ver meus projetos",
-      "url": "/projects",
-      "icons": [
-        {
-          "src": "/icons/projects-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Contato",
-      "short_name": "Contato", 
-      "description": "Entre em contato",
-      "url": "/contact",
-      "icons": [
-        {
-          "src": "/icons/contact-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Sobre",
-      "short_name": "Sobre",
-      "description": "Saiba mais sobre mim", 
-      "url": "/about",
-      "icons": [
-        {
-          "src": "/icons/about-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ]
-}
+# robots.txt para Portfolio Profissional de Luiz Felippe
+# Última atualização: Maio 2025
+
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+Allow: /rss.xml
+
+# Bloquear áreas administrativas
+Disallow: /admin/
+Disallow: /login/
+Disallow: /api/admin/
+
+# Bloquear arquivos duplicados/temporários/rascunhos
+Disallow: /*.json$
+Disallow: /*?*
+Disallow: /*preview=true$
+Disallow: /draft/
+Disallow: /temp/
+
+# Bloquear área em desenvolvimento
+Disallow: /novo-recurso/
+
+# Bloquear recursos do sistema
+Disallow: /api/placeholder/
+Disallow: /api/upload/
+Disallow: /api/analytics/
+Disallow: /api/health/
+
+# Permitir rastreamento de imagens
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.webp$
+
+# Permitir rastreamento de recursos essenciais
+Allow: /*.css$
+Allow: /*.js$
+Allow: /fonts/
+Allow: /manifest.json
+Allow: /favicon.ico
+
+# Sitemap
+Sitemap: https://luizfelippe.dev/sitemap.xml

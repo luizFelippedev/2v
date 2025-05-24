@@ -3,116 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline - Luiz Felippe Portfolio</title>
+    <title>Você está offline - Luiz Felippe Portfolio</title>
+    <link rel="icon" href="/favicon.ico">
+    <meta name="theme-color" content="#3b82f6">
     <style>
-        * {
+        :root {
+            --color-primary: #60a5fa;
+            --color-secondary: #a78bfa;
+            --color-accent: #fbbf24;
+            --color-background: #0f172a;
+            --color-surface: #1e293b;
+            --color-text: #f8fafc;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text);
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
             text-align: center;
-            padding: 20px;
         }
-
+        
         .container {
             max-width: 500px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            background-color: rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
+            margin: 1rem;
         }
-
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #3b82f6;
-        }
-
+        
         h1 {
             font-size: 2rem;
-            margin-bottom: 15px;
-            color: #3b82f6;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-
+        
         p {
-            font-size: 1rem;
+            margin-bottom: 1.5rem;
             line-height: 1.6;
-            color: #94a3b8;
-            margin-bottom: 30px;
         }
-
-        .retry-button {
-            background: #3b82f6;
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .status {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            background-color: rgba(234, 179, 8, 0.2);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            color: #fbbf24;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            margin-bottom: 1.5rem;
         }
-
-        .retry-button:hover {
-            background: #2563eb;
+        
+        .status::before {
+            content: "";
+            display: block;
+            width: 0.5rem;
+            height: 0.5rem;
+            background-color: currentColor;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+            color: white;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
+        
+        .cached-content {
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+        }
+        
+        .cached-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .cached-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">📡</div>
-        <h1>Sem Conexão</h1>
-        <p>
-            Parece que você está offline. Verifique sua conexão com a internet 
-            e tente novamente. Algumas partes do site podem estar indisponíveis.
-        </p>
-        <button class="retry-button" onclick="window.location.reload()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M23 4v6h-6"></path>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-            </svg>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c5.1 0 8.75 4.04 9.5 6-1.12 2.94-4.05 6-8.5 6-1.44 0-3.16-.39-4.74-1.2"></path>
+            <path d="M5 10c-.84 1.32-1.31 2.7-1.5 4 .63 2.67 2.72 5.06 6.2 5.73"></path>
+            <path d="M17 9a3 3 0 0 0-2.83-2.83"></path>
+            <path d="M5 19L19 5"></path>
+        </svg>
+        
+        <div class="status">Você está offline</div>
+        
+        <h1>Conexão Indisponível</h1>
+        
+        <p>Não foi possível se conectar à internet. Este é um modo offline do Portfolio de Luiz Felippe. Algumas funcionalidades e conteúdos podem estar limitados até que sua conexão seja restabelecida.</p>
+        
+        <button class="btn" onclick="window.location.reload()">
             Tentar Novamente
         </button>
+        
+        <div class="cached-content">
+            <p>Você ainda tem acesso a algumas páginas que foram salvas previamente:</p>
+            <div class="cached-list">
+                <a href="/" class="cached-item">Início</a>
+                <a href="/about" class="cached-item">Sobre</a>
+                <a href="/projects" class="cached-item">Projetos</a>
+                <a href="/skills" class="cached-item">Habilidades</a>
+            </div>
+        </div>
     </div>
-
+    
+    <footer>
+        © Luiz Felippe Portfolio | Versão Offline
+    </footer>
+    
     <script>
-        // Auto-retry quando a conexão for restaurada
+        // Verificar status da conexão
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }
+        
+        // Verificar periodicamente
+        setInterval(checkConnection, 5000);
+        
+        // Verificar quando a conexão for restabelecida
         window.addEventListener('online', () => {
             window.location.reload();
         });
-        
-        // Verificar conexão periodicamente
-        setInterval(() => {
-            if (navigator.onLine) {
-                fetch('/', { method: 'HEAD', cache: 'no-cache' })
-                    .then(() => {
-                        window.location.reload();
-                    })
-                    .catch(() => {
-                        // Ainda offline
-                    });
-            }
-        }, 5000);
     </script>
 </body>
 </html>

@@ -1,105 +1,134 @@
 {
   "name": "Luiz Felippe - Portfolio Profissional",
-  "short_name": "Luiz Felippe",
-  "description": "Portfolio profissional de Luiz Felippe - Engenheiro de Software Full Stack",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0f172a",
+  "short_name": "LF Portfolio",
+  "description": "Portfolio profissional de Luiz Felippe - Engenheiro de Software Full Stack especializado em React, Node.js, TypeScript e Inteligência Artificial.",
   "theme_color": "#3b82f6",
-  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "portrait",
   "scope": "/",
-  "categories": ["portfolio", "developer", "technology"],
+  "start_url": "/?source=pwa",
+  "id": "luizfelippe-portfolio",
   "lang": "pt-BR",
   "dir": "ltr",
-  "icons": [
+  "categories": ["portfolio", "technology", "development"],
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay"],
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "screenshots": [
     {
-      "src": "/favicon-16x16.png",
-      "sizes": "16x16",
+      "src": "/screenshots/desktop-home.png",
       "type": "image/png",
-      "purpose": "any"
+      "sizes": "1280x720",
+      "form_factor": "wide"
     },
     {
-      "src": "/favicon-32x32.png",
-      "sizes": "32x32",
+      "src": "/screenshots/mobile-home.png",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "720x1280",
+      "form_factor": "narrow"
     }
   ],
   "shortcuts": [
     {
-      "name": "Projetos",
-      "short_name": "Projetos",
-      "description": "Ver meus projetos",
-      "url": "/projects",
+      "name": "Sobre",
+      "url": "/about",
+      "description": "Conheça mais sobre Luiz Felippe",
       "icons": [
         {
-          "src": "/favicon-32x32.png",
-          "sizes": "32x32"
+          "src": "/icons/about-icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
         }
       ]
     },
     {
-      "name": "Sobre",
-      "short_name": "Sobre",
-      "description": "Sobre mim",
-      "url": "/about",
+      "name": "Projetos",
+      "url": "/projects",
+      "description": "Veja os projetos de Luiz Felippe",
       "icons": [
         {
-          "src": "/favicon-32x32.png",
-          "sizes": "32x32"
+          "src": "/icons/projects-icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
         }
       ]
     },
     {
       "name": "Contato",
-      "short_name": "Contato",
-      "description": "Entre em contato",
       "url": "/contact",
+      "description": "Entre em contato com Luiz Felippe",
       "icons": [
         {
-          "src": "/favicon-32x32.png",
-          "sizes": "32x32"
+          "src": "/icons/contact-icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png",
+          "purpose": "any"
         }
       ]
     }
   ],
-  "screenshots": [
+  "icons": [
     {
-      "src": "/screenshot-desktop.png",
-      "sizes": "1280x720",
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
       "type": "image/png",
-      "form_factor": "wide",
-      "label": "Homepage do Portfolio"
+      "purpose": "any"
     },
     {
-      "src": "/screenshot-mobile.png", 
-      "sizes": "390x844",
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
       "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Homepage Mobile"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 480
-  }
+  ]
 }
