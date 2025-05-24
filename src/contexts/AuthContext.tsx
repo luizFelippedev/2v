@@ -85,26 +85,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const userRole = localStorage.getItem("user_role");
 
         if (token && userEmail && userName && userRole) {
-          const user: User = {
-            id: "1",
-            name: userName,
-            email: userEmail,
-            role: userRole as "admin" | "user",
-            avatar: "/api/placeholder/40/40",
-          };
+          // Verificar se o token ainda é válido
+          const tokenParts = token.split("-");
+          const tokenTimestamp = parseInt(tokenParts[tokenParts.length - 1]);
+          const now = Date.now();
+          const oneDay = 24 * 60 * 60 * 1000; // 24 horas
 
-          dispatch({ type: "LOGIN_SUCCESS", payload: user });
+          if (now - tokenTimestamp < oneDay) {
+            const user: User = {
+              id: "1",
+              name: userName,
+              email: userEmail,
+              role: userRole as "admin" | "user",
+              avatar: "/api/placeholder/40/40",
+            };
+
+            // Definir cookie para o middleware
+            document.cookie = `portfolio_token=${token}; path=/; max-age=86400; SameSite=Strict`;
+
+            dispatch({ type: "LOGIN_SUCCESS", payload: user });
+          } else {
+            // Token expirado
+            await clearAuthData();
+            dispatch({ type: "LOGOUT" });
+          }
         } else {
           dispatch({ type: "LOGOUT" });
         }
       } catch (error) {
         console.error("Erro ao verificar autenticação:", error);
+        await clearAuthData();
         dispatch({ type: "LOGOUT" });
       }
     };
 
     checkAuth();
   }, []);
+
+  const clearAuthData = async () => {
+    localStorage.removeItem("portfolio_token");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("user_name");
+    localStorage.removeItem("user_role");
+    document.cookie = "portfolio_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     dispatch({ type: "LOGIN_START" });
@@ -138,6 +162,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("user_name", user.name);
         localStorage.setItem("user_role", user.role);
 
+        // Definir cookie para o middleware
+        document.cookie = `portfolio_token=${token}; path=/; max-age=86400; SameSite=Strict`;
+
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
         return true;
       } else {
@@ -151,12 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async (): Promise<void> => {
     try {
-      // Limpar localStorage
-      localStorage.removeItem("portfolio_token");
-      localStorage.removeItem("user_email");
-      localStorage.removeItem("user_name");
-      localStorage.removeItem("user_role");
-
+      await clearAuthData();
       dispatch({ type: "LOGOUT" });
     } catch (error) {
       console.error("Erro no logout:", error);

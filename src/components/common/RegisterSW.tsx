@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-interface RegisterSWProps {
-  onSuccess?: (registration: ServiceWorkerRegistration) => void;
-  onUpdate?: (registration: ServiceWorkerRegistration) => void;
-  onError?: (error: Error) => void;
-}
-
-export function RegisterSW({ onSuccess, onUpdate, onError }: RegisterSWProps = {}) {
+export function RegisterSW() {
   const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
@@ -36,11 +30,10 @@ export function RegisterSW({ onSuccess, onUpdate, onError }: RegisterSWProps = {
           });
 
           setIsRegistered(true);
-          onSuccess?.(existingRegistration);
 
           if (existingRegistration.waiting) {
             console.log('Nova versão do Service Worker disponível');
-            onUpdate?.(existingRegistration);
+            // Aqui você pode implementar lógica de atualização
           }
 
           return;
@@ -55,7 +48,6 @@ export function RegisterSW({ onSuccess, onUpdate, onError }: RegisterSWProps = {
         });
 
         setIsRegistered(true);
-        onSuccess?.(registration);
 
         registration.onupdatefound = () => {
           const installingWorker = registration.installing;
@@ -67,20 +59,19 @@ export function RegisterSW({ onSuccess, onUpdate, onError }: RegisterSWProps = {
               navigator.serviceWorker.controller
             ) {
               console.log('Nova versão do Service Worker instalada');
-              onUpdate?.(registration);
+              // Aqui você pode implementar lógica de atualização
             }
           };
         };
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
         console.error('Erro ao registrar o Service Worker:', err);
-        onError?.(err);
       }
     };
 
     window.addEventListener('load', registerSW);
     return () => window.removeEventListener('load', registerSW);
-  }, [onSuccess, onUpdate, onError]);
+  }, []);
 
   return null;
 }

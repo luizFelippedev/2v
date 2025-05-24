@@ -207,14 +207,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* Script de tema para evitar flash */}
         <ThemeScript />
 
-        {/* Preload de recursos críticos */}
-        <link 
+        {/* Preload de recursos críticos - removido para evitar warnings */}
+        {/* <link 
           rel="preload" 
           href="/fonts/inter-var.woff2" 
           as="font" 
           type="font/woff2" 
           crossOrigin="anonymous" 
-        />
+        /> */}
 
         {/* DNS Prefetch para recursos externos */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -271,19 +271,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
               {/* PWA */}
               <PWA />
               
-              {/* Service Worker */}
-              <RegisterSW 
-                onSuccess={(registration) => {
-                  console.log('SW registrado:', registration.scope);
-                }} 
-                onUpdate={(registration) => {
-                  console.log('SW atualizado:', registration);
-                  // Mostrar notificação de atualização
-                }}
-                onError={(error) => {
-                  console.error('Erro no SW:', error);
-                }}
-              />
+              {/* Service Worker - Sem props de callback */}
+              <RegisterSW />
             </NoSSR>
           </AppProviders>
         </ErrorBoundary>

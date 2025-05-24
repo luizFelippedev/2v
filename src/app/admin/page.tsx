@@ -16,7 +16,6 @@ import {
   ChevronRight,
   LogOut,
   AlertCircle,
-  Home,
 } from "lucide-react";
 import { useAuth } from "@/contexts";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,31 +35,26 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Wait a moment for auth context to initialize
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        if (authState.isLoading) {
-          // Still loading auth state, wait a bit more
-          return;
-        }
+        // Aguardar um momento para o contexto de auth inicializar
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         if (!authState.isAuthenticated) {
-          console.log("User not authenticated, redirecting to login...");
+          console.log("Usuário não autenticado, redirecionando para login...");
           router.replace("/login");
           return;
         }
 
-        console.log("User authenticated:", authState.user?.email);
+        console.log("Usuário autenticado:", authState.user?.email);
         setLoading(false);
       } catch (error) {
-        console.error("Error checking authentication:", error);
+        console.error("Erro ao verificar autenticação:", error);
         setError("Erro ao verificar autenticação");
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, [authState.isAuthenticated, authState.isLoading, router]);
+  }, [authState.isAuthenticated, router]);
 
   // Handle tab changes from URL
   useEffect(() => {
@@ -72,9 +66,7 @@ export default function AdminDashboard() {
   // Tab change handler
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set("tab", tabId);
-    router.push(newUrl.pathname + newUrl.search, { scroll: false });
+    router.push(`/admin?tab=${tabId}`, { scroll: false });
   };
 
   // Logout handler
@@ -83,13 +75,13 @@ export default function AdminDashboard() {
       await logout();
       router.replace("/login");
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error("Erro ao fazer logout:", error);
       setError("Erro ao fazer logout");
     }
   };
 
   // Display loading state
-  if (loading || authState.isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -111,20 +103,12 @@ export default function AdminDashboard() {
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-4">Erro</h2>
           <p className="text-gray-300 mb-6">{error}</p>
-          <div className="space-y-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl font-semibold text-white"
-            >
-              Tentar Novamente
-            </button>
-            <Link
-              href="/"
-              className="block px-6 py-3 border border-white/20 rounded-xl font-semibold text-white hover:bg-white/10 transition-colors"
-            >
-              Voltar ao Site
-            </Link>
-          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl font-semibold text-white"
+          >
+            Tentar Novamente
+          </button>
         </div>
       </div>
     );
@@ -140,23 +124,15 @@ export default function AdminDashboard() {
           <p className="text-gray-300 mb-6">
             Você precisa estar autenticado para acessar esta página.
           </p>
-          <div className="space-y-3">
-            <Link href="/login">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl font-semibold text-white"
-              >
-                Fazer Login
-              </motion.button>
-            </Link>
-            <Link
-              href="/"
-              className="block px-6 py-3 border border-white/20 rounded-xl font-semibold text-white hover:bg-white/10 transition-colors"
+          <Link href="/login">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl font-semibold text-white"
             >
-              Voltar ao Site
-            </Link>
-          </div>
+              Fazer Login
+            </motion.button>
+          </Link>
         </div>
       </div>
     );
@@ -218,9 +194,8 @@ export default function AdminDashboard() {
                 href="/"
                 className="flex items-center text-gray-400 hover:text-primary-400 transition-colors"
               >
-                <Home className="w-4 h-4 mr-2" />
-                <span>Ver site</span>
-                <ChevronRight className="w-4 h-4 ml-1" />
+                <span className="mr-2">Ver site</span>
+                <ChevronRight className="w-4 h-4" />
               </Link>
 
               <motion.button
@@ -407,19 +382,19 @@ const OverviewTab: React.FC = () => (
             label: "Novo Projeto",
             icon: <Plus className="w-4 h-4" />,
             color: "bg-blue-500",
-            link: "/admin?tab=projects",
+            link: "/admin/projects/new",
           },
           {
             label: "Novo Certificado",
             icon: <Award className="w-4 h-4" />,
             color: "bg-green-500",
-            link: "/admin?tab=certificates",
+            link: "/admin/certificates/new",
           },
           {
             label: "Ver Analytics",
             icon: <BarChart3 className="w-4 h-4" />,
             color: "bg-purple-500",
-            link: "#",
+            link: "/admin/analytics",
           },
         ].map((action, index) => (
           <Link key={index} href={action.link}>
@@ -447,13 +422,15 @@ const ProjectsTab: React.FC = () => (
   <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-xl font-bold text-white">Gerenciar Projetos</h3>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 rounded-lg text-white"
-      >
-        <Plus className="w-4 h-4" />
-        <span>Novo Projeto</span>
-      </motion.button>
+      <Link href="/admin/projects/new">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 rounded-lg text-white"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Novo Projeto</span>
+        </motion.button>
+      </Link>
     </div>
 
     <div className="space-y-4">
@@ -471,12 +448,14 @@ const ProjectsTab: React.FC = () => (
               </p>
             </div>
             <div className="flex space-x-2">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                className="p-2 bg-blue-500/20 text-blue-400 rounded-lg"
-              >
-                <Edit className="w-4 h-4" />
-              </motion.button>
+              <Link href={`/admin/projects/${index + 1}/edit`}>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  className="p-2 bg-blue-500/20 text-blue-400 rounded-lg"
+                >
+                  <Edit className="w-4 h-4" />
+                </motion.button>
+              </Link>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-red-500/20 text-red-400 rounded-lg"
@@ -496,13 +475,15 @@ const CertificatesTab: React.FC = () => (
   <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-xl font-bold text-white">Gerenciar Certificados</h3>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        className="flex items-center space-x-2 px-4 py-2 bg-green-600 rounded-lg text-white"
-      >
-        <Plus className="w-4 h-4" />
-        <span>Novo Certificado</span>
-      </motion.button>
+      <Link href="/admin/certificates/new">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center space-x-2 px-4 py-2 bg-green-600 rounded-lg text-white"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Novo Certificado</span>
+        </motion.button>
+      </Link>
     </div>
 
     <div className="space-y-4">
@@ -520,12 +501,14 @@ const CertificatesTab: React.FC = () => (
               <p className="text-gray-400 text-sm">Certificação profissional</p>
             </div>
             <div className="flex space-x-2">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                className="p-2 bg-blue-500/20 text-blue-400 rounded-lg"
-              >
-                <Edit className="w-4 h-4" />
-              </motion.button>
+              <Link href={`/admin/certificates/${index + 1}/edit`}>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  className="p-2 bg-blue-500/20 text-blue-400 rounded-lg"
+                >
+                  <Edit className="w-4 h-4" />
+                </motion.button>
+              </Link>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 className="p-2 bg-red-500/20 text-red-400 rounded-lg"
@@ -607,5 +590,5 @@ const SettingsTab: React.FC = () => (
         </motion.button>
       </div>
     </div>
-  </div>  
+  </div>
 );

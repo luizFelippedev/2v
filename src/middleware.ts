@@ -12,6 +12,9 @@ function isUserAuthenticated(request: NextRequest): boolean {
   const authCookie = request.cookies.get("portfolio_token");
   const authHeader = request.headers.get("Authorization");
   
+  console.log('Auth Cookie:', authCookie?.value); // Debug
+  console.log('Auth Header:', authHeader); // Debug
+  
   // Validação mais robusta do cookie
   const hasValidCookie = !!(
     authCookie?.value && 
@@ -26,7 +29,10 @@ function isUserAuthenticated(request: NextRequest): boolean {
     authHeader.length > 20 // Token mínimo
   );
 
-  return hasValidCookie || hasValidAuthHeader;
+  const isAuthenticated = hasValidCookie || hasValidAuthHeader;
+  console.log('Is Authenticated:', isAuthenticated); // Debug
+  
+  return isAuthenticated;
 }
 
 export function middleware(request: NextRequest) {
@@ -80,6 +86,15 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(png|jpg|jpeg|gif|svg|ico)$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Files with extensions (.png, .jpg, etc.)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js).*)",
+    "/api/((?!placeholder|health).*)",
   ],
 };
