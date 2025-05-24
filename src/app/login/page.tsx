@@ -6,6 +6,9 @@ import { useAuth } from "@/contexts";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+// Definir o tipo explicitamente
+type LoginStatus = "idle" | "success" | "error";
+
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
@@ -13,7 +16,7 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loginStatus, setLoginStatus] = useState<"idle" | "success" | "error">("idle");
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>("idle");
   const { state: authState, login } = useAuth();
   const router = useRouter();
 
@@ -93,6 +96,9 @@ export default function LoginPage() {
     return null;
   }
 
+  const isSuccessStatus = loginStatus === "success";
+  const isErrorStatus = loginStatus === "error";
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 pt-20">
       <motion.div
@@ -104,25 +110,25 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <motion.div
-              animate={{ rotate: loginStatus === "success" ? 0 : 360 }}
-              transition={{ duration: loginStatus === "success" ? 0 : 20, repeat: loginStatus === "success" ? 0 : Infinity, ease: "linear" }}
+              animate={{ rotate: isSuccessStatus ? 0 : 360 }}
+              transition={{ duration: isSuccessStatus ? 0 : 20, repeat: isSuccessStatus ? 0 : Infinity, ease: "linear" }}
               className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center"
             >
-              {loginStatus === "success" ? (
+              {isSuccessStatus ? (
                 <CheckCircle className="w-8 h-8 text-white" />
               ) : (
                 <Shield className="w-8 h-8 text-white" />
               )}
             </motion.div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-              {loginStatus === "success" ? "Login Realizado!" : "Acesso Administrativo"}
+              {isSuccessStatus ? "Login Realizado!" : "Acesso Administrativo"}
             </h1>
             <p className="text-gray-400 mt-2">
-              {loginStatus === "success" ? "Redirecionando..." : "Entre para acessar o painel"}
+              {isSuccessStatus ? "Redirecionando..." : "Entre para acessar o painel"}
             </p>
           </div>
 
-          {loginStatus !== "success" && (
+          {!isSuccessStatus && (
             <>
               {/* Demo Credentials */}
               <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
@@ -197,7 +203,7 @@ export default function LoginPage() {
                   </div>
 
                   {/* Error Message */}
-                  {(loginStatus === "error" || authState.error) && (
+                  {(isErrorStatus || authState.error) && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -215,9 +221,9 @@ export default function LoginPage() {
                     whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                     whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                     type="submit"
-                    disabled={isSubmitting || loginStatus === "success"}
+                    disabled={isSubmitting || isSuccessStatus}
                     className={`w-full py-3 rounded-xl font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all ${
-                      loginStatus === "success"
+                      isSuccessStatus
                         ? "bg-green-600"
                         : "bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700"
                     }`}
@@ -227,7 +233,7 @@ export default function LoginPage() {
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         <span>Entrando...</span>
                       </>
-                    ) : loginStatus === "success" ? (
+                    ) : isSuccessStatus ? (
                       <>
                         <CheckCircle className="w-5 h-5" />
                         <span>Login Realizado!</span>

@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   
   authors: [{ 
     name: "Luiz Felippe", 
-    url: "https://luizfelippe.dev" 
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"
   }],
   
   creator: "Luiz Felippe",
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://luizfelippe.dev",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev",
     title: "Luiz Felippe - Engenheiro de Software Full Stack",
     description: "Portfolio profissional de Luiz Felippe - Especialista em React, Node.js, TypeScript e IA.",
     siteName: "Luiz Felippe Portfolio",
@@ -96,22 +96,26 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Luiz Felippe - Engenheiro de Software Full Stack",
     description: "Portfolio profissional - Especialista em React, Node.js, TypeScript e IA.",
-    creator: "@luizfelippe",
+    creator: process.env.NEXT_PUBLIC_TWITTER_HANDLE || "@luizfelippe",
     images: ["/og-image.png"]
   },
   
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION,
+    ...(process.env.GOOGLE_SITE_VERIFICATION && {
+      google: process.env.GOOGLE_SITE_VERIFICATION
+    }),
     other: {
-      "facebook-domain-verification": process.env.FACEBOOK_DOMAIN_VERIFICATION
+      ...(process.env.FACEBOOK_DOMAIN_VERIFICATION && {
+        "facebook-domain-verification": process.env.FACEBOOK_DOMAIN_VERIFICATION
+      })
     }
   },
   
   alternates: {
-    canonical: "https://luizfelippe.dev",
+    canonical: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev",
     languages: {
-      'pt-BR': 'https://luizfelippe.dev',
-      'en-US': 'https://luizfelippe.dev/en',
+      'pt-BR': process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev",
+      'en-US': `${process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"}/en`,
     },
   },
 
@@ -156,8 +160,8 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Luiz Felippe",
-  "url": "https://luizfelippe.dev",
-  "image": "https://luizfelippe.dev/og-image.png",
+  "url": process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev",
+  "image": `${process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"}/og-image.png`,
   "jobTitle": "Engenheiro de Software Full Stack",
   "description": "Engenheiro de Software especializado em React, Node.js, TypeScript e Inteligência Artificial",
   "email": "luizfelippeandrade@outlook.com",
@@ -187,9 +191,9 @@ const jsonLd = {
     "Software Engineering"
   ],
   "sameAs": [
-    "https://github.com/luizfelippe",
-    "https://linkedin.com/in/luizfelippe",
-    "https://twitter.com/luizfelippe"
+    process.env.NEXT_PUBLIC_GITHUB_URL || "https://github.com/luizfelippe",
+    process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://linkedin.com/in/luizfelippe",
+    `https://twitter.com/${(process.env.NEXT_PUBLIC_TWITTER_HANDLE || "@luizfelippe").replace("@", "")}`
   ]
 };
 
@@ -208,19 +212,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* Script de tema para evitar flash */}
         <ThemeScript />
 
-        {/* Preload de recursos críticos - removido para evitar warnings */}
-        {/* <link 
-          rel="preload" 
-          href="/fonts/inter-var.woff2" 
-          as="font" 
-          type="font/woff2" 
-          crossOrigin="anonymous" 
-        /> */}
-
         {/* DNS Prefetch para recursos externos */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-        <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+        {process.env.GOOGLE_ANALYTICS_ID && (
+          <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+        )}
 
         {/* JSON-LD para SEO */}
         <script
@@ -240,7 +237,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* Skip to content para acessibilidade */}
         <a 
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-lg z-50"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-lg z-50 transition-all duration-200"
         >
           Pular para o conteúdo principal
         </a>
@@ -266,13 +263,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
               {/* Seletor de tema */}
               <ThemeSelector />
               
-              {/* Analytics */}
-              <Analytics />
+              {/* Analytics - apenas se habilitado */}
+              {process.env.NEXT_PUBLIC_ENABLE_ANALYTICS_TRACKING === 'true' && (
+                <Analytics />
+              )}
               
-              {/* PWA */}
-              <PWA />
+              {/* PWA - apenas se habilitado */}
+              {process.env.NEXT_PUBLIC_PWA_ENABLED === 'true' && (
+                <PWA />
+              )}
               
-              {/* Service Worker - Sem props de callback */}
+              {/* Service Worker */}
               <RegisterSW />
             </NoSSR>
           </AppProviders>
@@ -294,19 +295,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
               }
 
               // Service Worker registration fallback
-              if ('serviceWorker' in navigator) {
+              if ('serviceWorker' in navigator && ${process.env.NEXT_PUBLIC_PWA_ENABLED === 'true'}) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
-                      console.log('SW registrado:', registration.scope);
+                      ${process.env.NODE_ENV === 'development' ? "console.log('SW registrado:', registration.scope);" : ""}
                     })
                     .catch(error => {
-                      console.log('SW falhou:', error);
+                      ${process.env.NODE_ENV === 'development' ? "console.log('SW falhou:', error);" : ""}
                     });
                 });
               }
 
-              // Performance monitoring
+              // Performance monitoring - apenas em desenvolvimento
+              ${process.env.NODE_ENV === 'development' ? `
               if ('PerformanceObserver' in window) {
                 const perfObserver = new PerformanceObserver((list) => {
                   for (const entry of list.getEntries()) {
@@ -316,7 +318,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   }
                 });
                 perfObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-              }
+              }` : ''}
             `,
           }}
         />

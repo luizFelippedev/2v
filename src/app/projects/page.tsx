@@ -23,11 +23,13 @@ import {
 import { useData } from "@/contexts";
 import Link from "next/link";
 
-interface Project {
+// Local interface for the component
+interface LocalProject {
   id: string;
   title: string;
   slug: string;
-  shortDescription: string;
+  shortDescription?: string;
+  description?: string; // Alternative field name
   category: string;
   technologies: Array<{
     name: string;
@@ -48,7 +50,7 @@ interface Project {
 
 export default function ProjectsPage() {
   const { projects } = useData();
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<LocalProject[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -56,7 +58,7 @@ export default function ProjectsPage() {
   const [sortBy, setSortBy] = useState("recent");
 
   // Mock data fixo para evitar re-renders desnecessários
-  const mockProjects: Project[] = useMemo(
+  const mockProjects: LocalProject[] = useMemo(
     () => [
       {
         id: "1",
@@ -152,9 +154,25 @@ export default function ProjectsPage() {
     [],
   );
 
+  // Function to normalize projects from context to local format
+  const normalizeProjects = (contextProjects: any[]): LocalProject[] => {
+    return contextProjects.map((project: any) => ({
+      ...project,
+      shortDescription: project.shortDescription || project.description || "Sem descrição disponível",
+      views: project.views || 0,
+      likes: project.likes || 0,
+      featured: project.featured || false,
+      links: project.links || {},
+      technologies: project.technologies || [],
+    }));
+  };
+
   // Usa useMemo para evitar recálculo desnecessário
   const currentProjects = useMemo(() => {
-    return projects && projects.length > 0 ? projects : mockProjects;
+    if (projects && projects.length > 0) {
+      return normalizeProjects(projects);
+    }
+    return mockProjects;
   }, [projects, mockProjects]);
 
   const categories = useMemo(
@@ -189,6 +207,11 @@ export default function ProjectsPage() {
     [],
   );
 
+  // Helper function to get project description safely
+  const getProjectDescription = (project: LocalProject): string => {
+    return project.shortDescription || project.description || "";
+  };
+
   // UseEffect otimizado
   useEffect(() => {
     let filtered = [...currentProjects];
@@ -199,7 +222,7 @@ export default function ProjectsPage() {
       filtered = filtered.filter(
         (project) =>
           project.title.toLowerCase().includes(searchLower) ||
-          project.shortDescription.toLowerCase().includes(searchLower) ||
+          getProjectDescription(project).toLowerCase().includes(searchLower) ||
           project.technologies.some((tech) =>
             tech.name.toLowerCase().includes(searchLower),
           ),
@@ -223,7 +246,7 @@ export default function ProjectsPage() {
     // Ordenar
     switch (sortBy) {
       case "popular":
-        filtered.sort((a, b) => b.views - a.views);
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
         break;
       case "featured":
         filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
@@ -465,7 +488,7 @@ export default function ProjectsPage() {
 
                     {/* Action Buttons */}
                     <div className="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {project.links.live && (
+                      {project.links?.live && (
                         <motion.a
                           href={project.links.live}
                           target="_blank"
@@ -476,7 +499,7 @@ export default function ProjectsPage() {
                           <ExternalLink className="w-4 h-4 text-white" />
                         </motion.a>
                       )}
-                      {project.links.github && (
+                      {project.links?.github && (
                         <motion.a
                           href={project.links.github}
                           target="_blank"
@@ -496,7 +519,7 @@ export default function ProjectsPage() {
                       {project.title}
                     </h3>
                     <p className="text-gray-400 mb-4 line-clamp-2">
-                      {project.shortDescription}
+                      {getProjectDescription(project)}
                     </p>
 
                     {/* Technologies */}
@@ -525,11 +548,11 @@ export default function ProjectsPage() {
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <Eye className="w-4 h-4" />
-                          <span>{project.views}</span>
+                          <span>{project.views || 0}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Heart className="w-4 h-4" />
-                          <span>{project.likes}</span>
+                          <span>{project.likes || 0}</span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-1">

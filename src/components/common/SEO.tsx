@@ -1,6 +1,6 @@
 "use client";
 import Head from "next/head";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 interface SEOProps {
   title?: string;
@@ -37,9 +37,9 @@ export const SEO: React.FC<SEOProps> = ({
   noindex = false,
   nofollow = false,
 }) => {
-  const router = useRouter();
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://joaosilva.dev";
-  const currentUrl = `${siteUrl}${router.asPath || ""}`;
+  const pathname = usePathname();
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const currentUrl = `${siteUrl}${pathname || ""}`;
 
   const pageTitle = title
     ? `${title} | João Silva - Portfolio`
