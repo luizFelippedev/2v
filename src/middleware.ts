@@ -23,25 +23,31 @@ const allowedOrigins = [
 
 // Verifica se o usuário está autenticado
 function isUserAuthenticated(request: NextRequest): boolean {
+  // Verifica cookie de token
   const authCookie = request.cookies.get("portfolio_token");
+  
+  // Verifica header Authorization
   const authHeader = request.headers.get("Authorization");
   
-  // Verifica se há token válido
-  const hasValidToken = !!(
+  // Verifica se há token válido no cookie
+  const hasValidCookie = !!(
     authCookie?.value && 
     authCookie.value.length > 0 && 
-    authCookie.value !== "undefined"
+    authCookie.value !== "undefined" &&
+    authCookie.value.startsWith("demo-jwt-token")
   );
   
+  // Verifica se há token válido no header
   const hasValidAuthHeader = !!(
     authHeader && 
     authHeader.startsWith("Bearer ") && 
     authHeader.length > 7
   );
 
+  // Em desenvolvimento, permite bypass
   const isDev = process.env.NODE_ENV === "development";
 
-  return hasValidToken || hasValidAuthHeader || isDev;
+  return hasValidCookie || hasValidAuthHeader || isDev;
 }
 
 // Função para obter a origem CORS apropriada
@@ -66,10 +72,10 @@ function isPublicApiRoute(pathname: string): boolean {
 
 // Função para logs estruturados
 function logMiddleware(level: "info" | "warn" | "error", message: string, data?: any) {
-  if (process.env.NODE_ENV === "production") return;
-  
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] [Middleware:${level.toUpperCase()}] ${message}`, data || "");
+  if (process.env.NODE_ENV === "development") {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [Middleware:${level.toUpperCase()}] ${message}`, data || "");
+  }
 }
 
 export function middleware(request: NextRequest) {
@@ -108,8 +114,7 @@ export function middleware(request: NextRequest) {
   // 🔁 Rotas públicas (ex: login) redireciona se já autenticado
   if (authRoutes.some((route) => pathname.startsWith(route))) {
     if (isAuthenticated) {
-      const callbackUrl =
-        request.nextUrl.searchParams.get("callbackUrl") || "/admin";
+      const callbackUrl = request.nextUrl.searchParams.get("callbackUrl") || "/admin";
 
       logMiddleware("info", `Usuário autenticado, redirecionando para ${callbackUrl}`);
 
@@ -160,11 +165,11 @@ export function middleware(request: NextRequest) {
   response.headers.set("X-Download-Options", "noopen");
   response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
   
-  // CSP básico (ajuste conforme necessário)
+  // CSP básico para páginas não-API
   if (!pathname.startsWith("/api/")) {
     response.headers.set(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self';"
     );
   }
 
@@ -183,11 +188,6 @@ export function middleware(request: NextRequest) {
     );
     response.headers.set("Access-Control-Allow-Credentials", "true");
     response.headers.set("Access-Control-Max-Age", "86400");
-    
-    // Rate limiting headers (se implementado)
-    if (request.headers.get("x-ratelimit-remaining")) {
-      response.headers.set("X-RateLimit-Remaining", request.headers.get("x-ratelimit-remaining")!);
-    }
   }
 
   return response;
@@ -202,7 +202,8 @@ export const config = {
      * - _next/image (otimização de imagens)
      * - favicon.ico e outros ícones
      * - arquivos de manifest e service worker
+     * - arquivos de mídia
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|apple-icon.png|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$|.*\\.ico$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|apple-icon.png|icons/.*|.*\\.(png|jpg|jpeg|gif|svg|ico|webp|avif)$).*)",
   ],
 };

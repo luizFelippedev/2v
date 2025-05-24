@@ -39,7 +39,8 @@ type AuthAction =
   | { type: "LOGIN_SUCCESS"; payload: User }
   | { type: "LOGIN_FAILURE"; payload: string }
   | { type: "LOGOUT" }
-  | { type: "CLEAR_ERROR" };
+  | { type: "CLEAR_ERROR" }
+  | { type: "SET_LOADING"; payload: boolean };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
@@ -71,6 +72,8 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       };
     case "CLEAR_ERROR":
       return { ...state, error: null };
+    case "SET_LOADING":
+      return { ...state, isLoading: action.payload };
     default:
       return state;
   }
@@ -79,7 +82,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 const initialAuthState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: true, // Start as loading until we check localStorage
+  isLoading: true,
   error: null,
 };
 
@@ -87,12 +90,41 @@ interface AuthContextType {
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   checkPermission: (permission: keyof User["permissions"]) => boolean;
   trackAction: (action: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Safe localStorage access
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.warn("Error accessing localStorage:", error);
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {
+      console.warn("Error setting localStorage:", error);
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn("Error removing from localStorage:", error);
+    }
+  },
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -100,27 +132,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
   const [initialized, setInitialized] = useState(false);
 
-  // Check for existing token on mount
+  // Check for existing auth on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Use a try-catch block to safely access localStorage
-        let token;
-        try {
-          token = localStorage.getItem("portfolio_token");
-        } catch (e) {
-          console.error("Error accessing localStorage:", e);
-          token = null;
-        }
+        dispatch({ type: "SET_LOADING", payload: true });
 
-        if (token) {
-          // In a real app, validate token with API
-          // For mock, we'll just create a user
+        // Check for stored auth data
+        const token = safeLocalStorage.getItem("portfolio_token");
+        const userEmail = safeLocalStorage.getItem("user_email");
+        const userRole = safeLocalStorage.getItem("user_role");
+
+        if (token && userEmail && userRole) {
+          // Create user object from stored data
           const user: User = {
             id: "1",
             name: "Admin User",
-            email: "admin@portfolio.com",
-            role: "admin",
+            email: userEmail,
+            role: userRole as "admin" | "user" | "visitor",
             avatar: "/api/placeholder/40/40",
             stats: {
               loginCount: 1,
@@ -137,16 +166,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           };
 
           dispatch({ type: "LOGIN_SUCCESS", payload: user });
-          console.log("Auth restored from token");
+          console.log("Auth restored from localStorage");
         } else {
-          // No stored credentials
+          // No valid auth data found
           dispatch({ type: "LOGOUT" });
         }
       } catch (error) {
-        console.error("Error restoring auth:", error);
+        console.error("Error checking auth:", error);
         dispatch({ type: "LOGOUT" });
       } finally {
-        // Mark as initialized either way
+        dispatch({ type: "SET_LOADING", payload: false });
         setInitialized(true);
       }
     };
@@ -159,15 +188,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Hard-coded credentials for demo
-      if (email === "admin@portfolio.com" && password === "admin123") {
+      // Demo credentials
+      const validCredentials = [
+        { email: "admin@portfolio.com", password: "admin123", role: "admin" },
+        { email: "luizfelippeandrade@outlook.com", password: "123456", role: "admin" },
+      ];
+
+      const credential = validCredentials.find(
+        (cred) => cred.email === email && cred.password === password
+      );
+
+      if (credential) {
         const user: User = {
           id: "1",
-          name: "Admin User",
+          name: email === "admin@portfolio.com" ? "Admin User" : "Luiz Felippe",
           email: email,
-          role: "admin",
+          role: credential.role as "admin",
           avatar: "/api/placeholder/40/40",
           stats: {
             loginCount: 1,
@@ -183,46 +221,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         };
 
-        // Safely store in localStorage with try/catch
-        try {
-          localStorage.setItem("portfolio_token", "demo-jwt-token-" + Date.now());
-          localStorage.setItem("user_role", user.role);
-          localStorage.setItem("user_email", user.email);
-        } catch (e) {
-          console.error("Error storing auth in localStorage:", e);
-          // Continue with in-memory authentication even if localStorage fails
-        }
+        // Store auth data
+        const token = "demo-jwt-token-" + Date.now();
+        safeLocalStorage.setItem("portfolio_token", token);
+        safeLocalStorage.setItem("user_email", user.email);
+        safeLocalStorage.setItem("user_role", user.role);
 
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
         console.log("Login successful:", user);
         return true;
       } else {
-        throw new Error(
-          "Credenciais inválidas. Use admin@portfolio.com / admin123"
-        );
+        throw new Error("Credenciais inválidas. Use: admin@portfolio.com / admin123 ou luizfelippeandrade@outlook.com / 123456");
       }
     } catch (error: any) {
-      const errorMessage =
-        error?.message || "Erro ao fazer login. Tente novamente.";
+      const errorMessage = error?.message || "Erro ao fazer login. Tente novamente.";
       console.error("Login error:", errorMessage);
       dispatch({ type: "LOGIN_FAILURE", payload: errorMessage });
       return false;
     }
   };
 
-  const logout = () => {
-    // Clear localStorage
+  const logout = async (): Promise<void> => {
     try {
-      localStorage.removeItem("portfolio_token");
-      localStorage.removeItem("user_role");
-      localStorage.removeItem("user_email");
-    } catch (e) {
-      console.error("Error removing items from localStorage:", e);
-    }
+      // Clear localStorage
+      safeLocalStorage.removeItem("portfolio_token");
+      safeLocalStorage.removeItem("user_email");
+      safeLocalStorage.removeItem("user_role");
 
-    // Update state
-    dispatch({ type: "LOGOUT" });
-    console.log("Logged out successfully");
+      // Update state
+      dispatch({ type: "LOGOUT" });
+      console.log("Logged out successfully");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // Still logout even if there's an error
+      dispatch({ type: "LOGOUT" });
+    }
   };
 
   const checkPermission = (permission: keyof User["permissions"]): boolean => {
@@ -234,11 +267,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // In a real app, send to analytics
   };
 
-  // Don't render children until we've checked for existing auth
+  // Don't render children until auth is checked
   if (!initialized) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Verificando autenticação...</p>
+        </div>
       </div>
     );
   }
