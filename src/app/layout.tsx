@@ -1,5 +1,5 @@
-// src/app/layout.tsx (modificado)
-import type { Metadata } from "next";
+// src/app/layout.tsx
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { AppProviders } from "@/contexts";
@@ -14,60 +14,52 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { GlobalSearch } from "@/components/common/GlobalSearch";
 import { RegisterSW } from "@/components/common/RegisterSW";
 
-// Configuração da fonte
+// Configuração da fonte com otimizações
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+  preload: true,
+  fallback: ["system-ui", "arial"],
 });
 
-// Metadados SEO
+// Metadados SEO otimizados
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"),
+  
   title: {
-    default: "Luiz Felippe - Portfolio Profissional",
+    default: "Luiz Felippe - Engenheiro de Software Full Stack",
     template: "%s | Luiz Felippe Portfolio"
   },
-  description: "Portfolio profissional de Luiz Felippe - Desenvolvedor Full Stack especializado em React, Node.js e IA. Criando experiências digitais excepcionais.",
+  
+  description: "Portfolio profissional de Luiz Felippe - Engenheiro de Software Full Stack especializado em React, Node.js, TypeScript e Inteligência Artificial. Criando experiências digitais excepcionais.",
+  
   keywords: [
-    "portfolio",
-    "desenvolvedor",
-    "full stack",
-    "react",
-    "nodejs",
-    "typescript",
-    "inteligência artificial",
-    "frontend",
-    "backend",
-    "engenheiro de software"
+    "Luiz Felippe",
+    "Engenheiro de Software",
+    "Full Stack Developer",
+    "React",
+    "Node.js",
+    "TypeScript",
+    "JavaScript",
+    "Python",
+    "Inteligência Artificial",
+    "Machine Learning",
+    "Frontend",
+    "Backend",
+    "Web Development",
+    "Portfolio",
+    "São Paulo",
+    "Brasil"
   ],
-  authors: [{ name: "Luiz Felippe", url: "https://luizfelippe.dev" }],
+  
+  authors: [{ 
+    name: "Luiz Felippe", 
+    url: "https://luizfelippe.dev" 
+  }],
+  
   creator: "Luiz Felippe",
-  metadataBase: new URL("https://luizfelippe.dev"),
-  
-  openGraph: {
-    type: "website",
-    locale: "pt_BR",
-    url: "https://luizfelippe.dev",
-    title: "Luiz Felippe - Portfolio Profissional",
-    description: "Portfolio profissional de Luiz Felippe - Desenvolvedor Full Stack especializado em React, Node.js e IA.",
-    siteName: "Luiz Felippe Portfolio",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Luiz Felippe - Portfolio"
-      }
-    ]
-  },
-  
-  twitter: {
-    card: "summary_large_image",
-    title: "Luiz Felippe - Portfolio Profissional",
-    description: "Portfolio profissional de Luiz Felippe - Desenvolvedor Full Stack especializado em React, Node.js e IA.",
-    creator: "@luizfelippe",
-    images: ["/og-image.png"]
-  },
+  publisher: "Luiz Felippe",
   
   robots: {
     index: true,
@@ -81,52 +73,138 @@ export const metadata: Metadata = {
     }
   },
   
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://luizfelippe.dev",
+    title: "Luiz Felippe - Engenheiro de Software Full Stack",
+    description: "Portfolio profissional de Luiz Felippe - Especialista em React, Node.js, TypeScript e IA.",
+    siteName: "Luiz Felippe Portfolio",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Luiz Felippe - Portfolio Profissional",
+        type: "image/png"
+      }
+    ]
+  },
+  
+  twitter: {
+    card: "summary_large_image",
+    title: "Luiz Felippe - Engenheiro de Software Full Stack",
+    description: "Portfolio profissional - Especialista em React, Node.js, TypeScript e IA.",
+    creator: "@luizfelippe",
+    images: ["/og-image.png"]
+  },
+  
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION ?? '',
+    google: process.env.GOOGLE_SITE_VERIFICATION,
     other: {
-      "facebook-domain-verification": process.env.FACEBOOK_DOMAIN_VERIFICATION ?? ''
+      "facebook-domain-verification": process.env.FACEBOOK_DOMAIN_VERIFICATION
     }
   },
   
   alternates: {
     canonical: "https://luizfelippe.dev",
     languages: {
-      'pt-BR': 'https://luizfelippe.dev/pt-BR',
-      'en-US': 'https://luizfelippe.dev/en-US',
+      'pt-BR': 'https://luizfelippe.dev',
+      'en-US': 'https://luizfelippe.dev/en',
     },
   },
 
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
     ],
     apple: [
-      { url: '/apple-touch-icon.png' }
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
     ],
     other: [
-      {
-        rel: 'manifest',
-        url: '/manifest.json'
-      }
+      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#3b82f6' }
     ]
   },
+
+  manifest: '/manifest.json',
+  
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent'
+  }
 };
 
-export default function RootLayout({
-  children,
-}: {
+// Viewport otimizado
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' }
+  ],
+  colorScheme: 'dark light'
+};
+
+// JSON-LD para SEO estruturado
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Luiz Felippe",
+  "url": "https://luizfelippe.dev",
+  "image": "https://luizfelippe.dev/og-image.png",
+  "jobTitle": "Engenheiro de Software Full Stack",
+  "description": "Engenheiro de Software especializado em React, Node.js, TypeScript e Inteligência Artificial",
+  "email": "luizfelippeandrade@outlook.com",
+  "telephone": "+55-11-95232-3645",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "São Paulo",
+    "addressRegion": "SP", 
+    "addressCountry": "BR"
+  },
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Freelancer"
+  },
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "Unesa"
+  },
+  "knowsAbout": [
+    "JavaScript",
+    "TypeScript", 
+    "React",
+    "Node.js",
+    "Python",
+    "Machine Learning",
+    "Web Development",
+    "Software Engineering"
+  ],
+  "sameAs": [
+    "https://github.com/luizfelippe",
+    "https://linkedin.com/in/luizfelippe",
+    "https://twitter.com/luizfelippe"
+  ]
+};
+
+interface RootLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html
       lang="pt-BR"
       className={`${inter.variable} scroll-smooth`}
-      suppressHydrationWarning={true}
+      suppressHydrationWarning
     >
       <head>
-        {/* Theme Script para carregamento inicial de tema */}
+        {/* Script de tema para evitar flash */}
         <ThemeScript />
 
         {/* Preload de recursos críticos */}
@@ -141,15 +219,32 @@ export default function RootLayout({
         {/* DNS Prefetch para recursos externos */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+
+        {/* JSON-LD para SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
+        {/* Preconnect para recursos críticos */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       
       <body 
-        className={`${inter.className} antialiased bg-background text-foreground`}
-        suppressHydrationWarning={true}
+        className={`${inter.className} antialiased bg-background text-foreground overflow-x-hidden`}
+        suppressHydrationWarning
       >
-        {/* Tratamento de erros */}
+        {/* Skip to content para acessibilidade */}
+        <a 
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-lg z-50"
+        >
+          Pular para o conteúdo principal
+        </a>
+
         <ErrorBoundary>
-          {/* Provedor de contextos */}
           <AppProviders>
             {/* Navegação principal */}
             <Navbar />
@@ -158,52 +253,79 @@ export default function RootLayout({
             <GlobalSearch />
 
             {/* Conteúdo principal */}
-            <main>{children}</main>
+            <main id="main-content" className="min-h-screen">
+              {children}
+            </main>
 
             {/* Rodapé */}
             <Footer />
 
             {/* Componentes não SSR */}
-            <NoSSR>
+            <NoSSR fallback={null}>
               {/* Seletor de tema */}
               <ThemeSelector />
               
-              {/* Análises */}
+              {/* Analytics */}
               <Analytics />
               
-              {/* Componente PWA */}
+              {/* PWA */}
               <PWA />
               
-              {/* Registro do Service Worker */}
+              {/* Service Worker */}
               <RegisterSW 
                 onSuccess={(registration) => {
-                  console.log('Service Worker registrado com sucesso:', registration);
+                  console.log('SW registrado:', registration.scope);
                 }} 
                 onUpdate={(registration) => {
-                  console.log('Nova versão disponível, atualizando...', registration);
+                  console.log('SW atualizado:', registration);
+                  // Mostrar notificação de atualização
                 }}
                 onError={(error) => {
-                  console.error('Erro ao registrar Service Worker:', error);
+                  console.error('Erro no SW:', error);
                 }}
               />
             </NoSSR>
           </AppProviders>
         </ErrorBoundary>
 
-        {/* Script de suporte a PWA - Fallback para o componente RegisterSW */}
+        {/* Scripts inline para performance */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // Critical performance optimizations
+              if ('requestIdleCallback' in window) {
+                requestIdleCallback(() => {
+                  // Load non-critical resources
+                  const link = document.createElement('link');
+                  link.rel = 'stylesheet';
+                  link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
+                  document.head.appendChild(link);
+                });
+              }
+
+              // Service Worker registration fallback
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
+                window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    .then(registration => {
+                      console.log('SW registrado:', registration.scope);
                     })
-                    .catch(function(error) {
-                      console.log('ServiceWorker registration failed: ', error);
+                    .catch(error => {
+                      console.log('SW falhou:', error);
                     });
                 });
+              }
+
+              // Performance monitoring
+              if ('PerformanceObserver' in window) {
+                const perfObserver = new PerformanceObserver((list) => {
+                  for (const entry of list.getEntries()) {
+                    if (entry.entryType === 'largest-contentful-paint') {
+                      console.log('LCP:', entry.startTime);
+                    }
+                  }
+                });
+                perfObserver.observe({ entryTypes: ['largest-contentful-paint'] });
               }
             `,
           }}
@@ -212,12 +334,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-// Configurações de segurança de cabeçalhos
-export const headers = {
-  'X-Frame-Options': 'DENY',
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
-};

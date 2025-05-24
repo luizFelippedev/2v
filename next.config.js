@@ -1,83 +1,72 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Environment variables for client-side
-  env: {
-    CUSTOM_KEY: 'portfolio-value',
-    NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
-  },
+  reactStrictMode: true,
+  swcMinify: true,
   
-  // Images configuration
-  images: {
-    domains: [
-      'picsum.photos',
-      'via.placeholder.com',
-      'ui-avatars.com',
-      'localhost',
-    ],
-    formats: ['image/webp'],
+  // Configurações de performance
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['framer-motion', 'lucide-react']
   },
-  
-  // Add support for service worker
+
+  // Headers de segurança
   async headers() {
     return [
-      {
-        source: '/sw.js',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
-          },
-        ],
-      },
       {
         source: '/(.*)',
         headers: [
           {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
             key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            value: 'nosniff'
           },
           {
-            key: 'X-Frame-Options', 
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
-      },
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          }
+        ]
+      }
     ];
   },
-  
-  // Experimental features
-  experimental: {
-    // Server Actions are enabled by default in Next.js 14
-    optimizeCss: true,
-    scrollRestoration: true,
-  },
-  
-  // Redirects
-  async redirects() {
+
+  // Configurar PWA
+  async rewrites() {
     return [
       {
-        source: '/placeholder/:width/:height',
-        destination: '/api/placeholder/:width/:height',
-        permanent: true,
-      },
+        source: '/sw.js',
+        destination: '/api/sw'
+      }
     ];
   },
-  
-  // Output settings
-  output: 'standalone',
-  
-  // Disable React StrictMode if causing issues with animations
-  // reactStrictMode: false,
-  
-  // Trailing slash settings
-  trailingSlash: false,
-  
-  // Powered by header
-  poweredByHeader: false,
+
+  // Otimizações de imagem
+  images: {
+    domains: ['via.placeholder.com', 'picsum.photos', 'ui-avatars.com'],
+    formats: ['image/webp', 'image/avif']
+  },
+
+  // Compressão
+  compress: true,
+
+  // Bundle analyzer em desenvolvimento
+  ...(process.env.ANALYZE === 'true' && {
+    webpack: (config) => {
+      if (process.env.NODE_ENV === 'development') {
+        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+        config.plugins.push(
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'server',
+            openAnalyzer: false,
+          })
+        );
+      }
+      return config;
+    }
+  })
 };
 
 module.exports = nextConfig;
