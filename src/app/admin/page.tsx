@@ -83,13 +83,13 @@ export default function AdminDashboard() {
   // Display loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-white">
             Carregando dashboard...
           </h2>
-          <p className="text-gray-400 mt-2">Verificando credenciais</p>
+          <p className="text-slate-400 mt-2">Verificando credenciais</p>
         </div>
       </div>
     );
@@ -98,14 +98,14 @@ export default function AdminDashboard() {
   // Display error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 pt-20 flex items-center justify-center">
-        <div className="text-center max-w-md p-8 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10">
+      <div className="min-h-screen bg-slate-900 pt-20 flex items-center justify-center">
+        <div className="text-center max-w-md p-8 bg-slate-800 rounded-2xl border border-slate-700">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-4">Erro</h2>
-          <p className="text-gray-300 mb-6">{error}</p>
+          <p className="text-slate-300 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl font-semibold text-white"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold text-white transition-colors"
           >
             Tentar Novamente
           </button>
@@ -117,18 +117,18 @@ export default function AdminDashboard() {
   // If not authenticated, show error message with login button
   if (!authState.isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 pt-20 flex items-center justify-center">
-        <div className="text-center max-w-md p-8 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10">
+      <div className="min-h-screen bg-slate-900 pt-20 flex items-center justify-center">
+        <div className="text-center max-w-md p-8 bg-slate-800 rounded-2xl border border-slate-700">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-4">Acesso Negado</h2>
-          <p className="text-gray-300 mb-6">
+          <p className="text-slate-300 mb-6">
             Você precisa estar autenticado para acessar esta página.
           </p>
           <Link href="/login">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl font-semibold text-white"
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold text-white transition-colors"
             >
               Fazer Login
             </motion.button>
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 pt-20">
+    <div className="min-h-screen bg-slate-900 pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -181,10 +181,10 @@ export default function AdminDashboard() {
             className="flex items-center justify-between"
           >
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-white">
                 Dashboard Administrativo
               </h1>
-              <p className="text-gray-400 mt-2">
+              <p className="text-slate-400 mt-2">
                 Bem-vindo de volta, {authState.user?.name || "Admin"}! 👋
               </p>
             </div>
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-4">
               <Link
                 href="/"
-                className="flex items-center text-gray-400 hover:text-primary-400 transition-colors"
+                className="flex items-center text-slate-400 hover:text-white transition-colors"
               >
                 <span className="mr-2">Ver site</span>
                 <ChevronRight className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/20"
+                className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 hover:bg-red-500/30 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sair</span>
@@ -223,39 +223,39 @@ export default function AdminDashboard() {
               title: "Projetos",
               value: stats.totalProjects,
               icon: <Briefcase className="w-5 h-5" />,
-              color: "from-blue-500 to-blue-600",
+              color: "bg-blue-500",
               href: "/admin?tab=projects",
             },
             {
               title: "Certificados",
               value: stats.totalCertificates,
               icon: <Award className="w-5 h-5" />,
-              color: "from-green-500 to-green-600",
+              color: "bg-green-500",
               href: "/admin?tab=certificates",
             },
             {
               title: "Usuários",
               value: stats.totalUsers,
               icon: <Users className="w-5 h-5" />,
-              color: "from-purple-500 to-purple-600",
+              color: "bg-purple-500",
               href: "#",
             },
             {
               title: "Visualizações",
               value: stats.totalViews,
               icon: <Eye className="w-5 h-5" />,
-              color: "from-orange-500 to-orange-600",
+              color: "bg-orange-500",
               href: "#",
             },
           ].map((stat, index) => (
             <Link key={stat.title} href={stat.href}>
               <motion.div
                 whileHover={{ scale: 1.02, y: -2 }}
-                className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6 cursor-pointer"
+                className="bg-slate-800 rounded-2xl border border-slate-700 p-6 cursor-pointer hover:bg-slate-700 transition-colors"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div
-                    className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}
+                    className={`p-3 rounded-xl ${stat.color} text-white`}
                   >
                     {stat.icon}
                   </div>
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
                 <div className="text-2xl font-bold text-white mb-1">
                   {stat.value.toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-400">{stat.title}</div>
+                <div className="text-sm text-slate-400">{stat.title}</div>
               </motion.div>
             </Link>
           ))}
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <div className="mb-8">
-          <div className="flex space-x-1 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-2">
+          <div className="flex space-x-1 bg-slate-800 rounded-2xl border border-slate-700 p-2">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.id}
@@ -279,8 +279,8 @@ export default function AdminDashboard() {
                 onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all ${
                   activeTab === tab.id
-                    ? "bg-primary-500/20 text-primary-400"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                    ? "bg-blue-500 text-white"
+                    : "text-slate-400 hover:text-white hover:bg-slate-700"
                 }`}
               >
                 {tab.icon}
@@ -313,9 +313,9 @@ export default function AdminDashboard() {
 // Overview Tab Component
 const OverviewTab: React.FC = () => (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+    <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
       <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-        <Activity className="w-5 h-5 mr-2" />
+        <Activity className="w-5 h-5 mr-2 text-blue-400" />
         Atividades Recentes
       </h3>
       <div className="space-y-4">
@@ -342,7 +342,7 @@ const OverviewTab: React.FC = () => (
           <Link key={index} href={activity.link}>
             <motion.div
               whileHover={{ scale: 1.01, x: 4 }}
-              className="flex items-center space-x-4 p-4 rounded-xl hover:bg-white/5 cursor-pointer"
+              className="flex items-center space-x-4 p-4 rounded-xl hover:bg-slate-700 cursor-pointer transition-colors"
             >
               <div
                 className={`p-2 rounded-lg ${
@@ -365,16 +365,16 @@ const OverviewTab: React.FC = () => (
                 <div className="text-white text-sm font-medium">
                   {activity.title}
                 </div>
-                <div className="text-gray-400 text-xs">{activity.time}</div>
+                <div className="text-slate-400 text-xs">{activity.time}</div>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-slate-500" />
             </motion.div>
           </Link>
         ))}
       </div>
     </div>
 
-    <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+    <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
       <h3 className="text-xl font-bold text-white mb-6">Ações Rápidas</h3>
       <div className="space-y-3">
         {[
@@ -400,15 +400,15 @@ const OverviewTab: React.FC = () => (
           <Link key={index} href={action.link}>
             <motion.div
               whileHover={{ scale: 1.02, x: 4 }}
-              className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer"
+              className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-700 cursor-pointer transition-colors"
             >
-              <div className={`p-2 rounded-lg ${action.color}`}>
+              <div className={`p-2 rounded-lg ${action.color} text-white`}>
                 {action.icon}
               </div>
               <span className="text-white text-sm font-medium">
                 {action.label}
               </span>
-              <ChevronRight className="w-4 h-4 text-gray-500 ml-auto" />
+              <ChevronRight className="w-4 h-4 text-slate-500 ml-auto" />
             </motion.div>
           </Link>
         ))}
@@ -419,13 +419,13 @@ const OverviewTab: React.FC = () => (
 
 // Projects Tab Component
 const ProjectsTab: React.FC = () => (
-  <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+  <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-xl font-bold text-white">Gerenciar Projetos</h3>
       <Link href="/admin/projects/new">
         <motion.button
           whileHover={{ scale: 1.05 }}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 rounded-lg text-white"
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Novo Projeto</span>
@@ -438,12 +438,12 @@ const ProjectsTab: React.FC = () => (
         <motion.div
           key={index}
           whileHover={{ y: -2, x: 2 }}
-          className="p-4 bg-black/30 rounded-xl border border-white/10 hover:border-primary-500/30"
+          className="p-4 bg-slate-700 rounded-xl border border-slate-600 hover:border-slate-500 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-white font-medium">Projeto {index + 1}</h4>
-              <p className="text-gray-400 text-sm">
+              <p className="text-slate-400 text-sm">
                 Descrição breve do projeto
               </p>
             </div>
@@ -451,14 +451,14 @@ const ProjectsTab: React.FC = () => (
               <Link href={`/admin/projects/${index + 1}/edit`}>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
-                  className="p-2 bg-blue-500/20 text-blue-400 rounded-lg"
+                  className="p-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                 </motion.button>
               </Link>
               <motion.button
                 whileHover={{ scale: 1.1 }}
-                className="p-2 bg-red-500/20 text-red-400 rounded-lg"
+                className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </motion.button>
@@ -472,13 +472,13 @@ const ProjectsTab: React.FC = () => (
 
 // Certificates Tab Component
 const CertificatesTab: React.FC = () => (
-  <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+  <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-xl font-bold text-white">Gerenciar Certificados</h3>
       <Link href="/admin/certificates/new">
         <motion.button
           whileHover={{ scale: 1.05 }}
-          className="flex items-center space-x-2 px-4 py-2 bg-green-600 rounded-lg text-white"
+          className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Novo Certificado</span>
@@ -491,27 +491,27 @@ const CertificatesTab: React.FC = () => (
         <motion.div
           key={index}
           whileHover={{ y: -2, x: 2 }}
-          className="p-4 bg-black/30 rounded-xl border border-white/10 hover:border-primary-500/30"
+          className="p-4 bg-slate-700 rounded-xl border border-slate-600 hover:border-slate-500 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-white font-medium">
                 Certificado {index + 1}
               </h4>
-              <p className="text-gray-400 text-sm">Certificação profissional</p>
+              <p className="text-slate-400 text-sm">Certificação profissional</p>
             </div>
             <div className="flex space-x-2">
               <Link href={`/admin/certificates/${index + 1}/edit`}>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
-                  className="p-2 bg-blue-500/20 text-blue-400 rounded-lg"
+                  className="p-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                 </motion.button>
               </Link>
               <motion.button
                 whileHover={{ scale: 1.1 }}
-                className="p-2 bg-red-500/20 text-red-400 rounded-lg"
+                className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </motion.button>
@@ -525,55 +525,55 @@ const CertificatesTab: React.FC = () => (
 
 // Settings Tab Component
 const SettingsTab: React.FC = () => (
-  <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+  <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
     <h3 className="text-xl font-bold text-white mb-6">
       Configurações do Sistema
     </h3>
 
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-black/30 rounded-xl p-4 border border-white/10">
+        <div className="bg-slate-700 rounded-xl p-4 border border-slate-600">
           <h4 className="text-lg font-medium text-white mb-4">
             Perfil de Usuário
           </h4>
           <div className="space-y-3">
             <div>
-              <label className="text-gray-400 text-sm">Nome</label>
+              <label className="text-slate-400 text-sm">Nome</label>
               <input
                 type="text"
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white mt-1"
+                className="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white mt-1 focus:border-blue-500 focus:outline-none"
                 defaultValue="Admin User"
               />
             </div>
             <div>
-              <label className="text-gray-400 text-sm">Email</label>
+              <label className="text-slate-400 text-sm">Email</label>
               <input
                 type="email"
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white mt-1"
+                className="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white mt-1 focus:border-blue-500 focus:outline-none"
                 defaultValue="admin@portfolio.com"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-black/30 rounded-xl p-4 border border-white/10">
+        <div className="bg-slate-700 rounded-xl p-4 border border-slate-600">
           <h4 className="text-lg font-medium text-white mb-4">
             Configurações do Site
           </h4>
           <div className="space-y-3">
             <div>
-              <label className="text-gray-400 text-sm">Título do Site</label>
+              <label className="text-slate-400 text-sm">Título do Site</label>
               <input
                 type="text"
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white mt-1"
+                className="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white mt-1 focus:border-blue-500 focus:outline-none"
                 defaultValue="Portfolio Profissional"
               />
             </div>
             <div>
-              <label className="text-gray-400 text-sm">Descrição</label>
+              <label className="text-slate-400 text-sm">Descrição</label>
               <input
                 type="text"
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white mt-1"
+                className="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white mt-1 focus:border-blue-500 focus:outline-none"
                 defaultValue="Meu portfolio profissional de desenvolvedor"
               />
             </div>
@@ -584,7 +584,7 @@ const SettingsTab: React.FC = () => (
       <div className="flex justify-end">
         <motion.button
           whileHover={{ scale: 1.05 }}
-          className="px-6 py-2 bg-primary-600 rounded-lg text-white"
+          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
         >
           Salvar Configurações
         </motion.button>

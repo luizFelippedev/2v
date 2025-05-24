@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import "../styles/globals.css";
+
 import { AppProviders } from "@/contexts";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -13,6 +13,7 @@ import { NoSSR } from "@/components/common/NoSSR";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { GlobalSearch } from "@/components/common/GlobalSearch";
 import { RegisterSW } from "@/components/common/RegisterSW";
+import "@/styles/globals.css";
 
 // Configuração da fonte com otimizações
 const inter = Inter({
