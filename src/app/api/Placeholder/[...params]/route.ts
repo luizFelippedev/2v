@@ -1,6 +1,5 @@
 // app/api/placeholder/[...dimensions]/route.ts
-
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
@@ -8,21 +7,24 @@ export async function GET(
 ) {
   try {
     const { dimensions } = params;
-    
-    // Parse dimensions from URL params
+
+    // Pega largura e altura dos parâmetros ou define padrão
     const [widthStr, heightStr] = dimensions;
     const width = parseInt(widthStr) || 400;
     const height = parseInt(heightStr) || 300;
-    
-    // Validate dimensions (reasonable limits)
+
+    // Validação simples para evitar abusos
     if (width < 1 || width > 2000 || height < 1 || height > 2000) {
       return NextResponse.json(
-        { error: 'Invalid dimensions. Width and height must be between 1 and 2000.' },
+        {
+          error:
+            "Invalid dimensions. Width and height must be between 1 and 2000.",
+        },
         { status: 400 }
       );
     }
-    
-    // Generate SVG placeholder
+
+    // Cria SVG dinâmico
     const svg = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="#f3f4f6"/>
@@ -32,19 +34,19 @@ export async function GET(
         </text>
       </svg>
     `;
-    
-    // Return SVG with proper headers
+
+    // Retorna SVG com cabeçalhos apropriados
     return new NextResponse(svg, {
       status: 200,
       headers: {
-        'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=31536000", // cache de 1 ano
       },
     });
   } catch (error) {
-    console.error('Placeholder API error:', error);
+    console.error("Placeholder API error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
