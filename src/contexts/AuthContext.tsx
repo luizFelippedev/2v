@@ -142,12 +142,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const token = safeLocalStorage.getItem("portfolio_token");
         const userEmail = safeLocalStorage.getItem("user_email");
         const userRole = safeLocalStorage.getItem("user_role");
+        const userName = safeLocalStorage.getItem("user_name");
 
         if (token && userEmail && userRole) {
           // Create user object from stored data
           const user: User = {
             id: "1",
-            name: "Admin User",
+            name: userName || (userEmail === "admin@portfolio.com" ? "Admin User" : "Luiz Felippe"),
             email: userEmail,
             role: userRole as "admin" | "user" | "visitor",
             avatar: "/api/placeholder/40/40",
@@ -166,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           };
 
           dispatch({ type: "LOGIN_SUCCESS", payload: user });
-          console.log("Auth restored from localStorage");
+          console.log("Auth restored from localStorage:", user.email);
         } else {
           // No valid auth data found
           dispatch({ type: "LOGOUT" });
@@ -188,23 +189,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Demo credentials
       const validCredentials = [
-        { email: "admin@portfolio.com", password: "admin123", role: "admin" },
-        { email: "luizfelippeandrade@outlook.com", password: "123456", role: "admin" },
+        { email: "admin@portfolio.com", password: "admin123", role: "admin", name: "Admin User" },
+        { email: "luizfelippeandrade@outlook.com", password: "123456", role: "admin", name: "Luiz Felippe" },
       ];
 
       const credential = validCredentials.find(
-        (cred) => cred.email === email && cred.password === password
+        (cred) => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
       );
 
       if (credential) {
         const user: User = {
           id: "1",
-          name: email === "admin@portfolio.com" ? "Admin User" : "Luiz Felippe",
-          email: email,
+          name: credential.name,
+          email: credential.email,
           role: credential.role as "admin",
           avatar: "/api/placeholder/40/40",
           stats: {
@@ -225,10 +226,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const token = "demo-jwt-token-" + Date.now();
         safeLocalStorage.setItem("portfolio_token", token);
         safeLocalStorage.setItem("user_email", user.email);
+        safeLocalStorage.setItem("user_name", user.name);
         safeLocalStorage.setItem("user_role", user.role);
 
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
-        console.log("Login successful:", user);
+        console.log("Login successful:", user.email);
         return true;
       } else {
         throw new Error("Credenciais inválidas. Use: admin@portfolio.com / admin123 ou luizfelippeandrade@outlook.com / 123456");
@@ -247,6 +249,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       safeLocalStorage.removeItem("portfolio_token");
       safeLocalStorage.removeItem("user_email");
       safeLocalStorage.removeItem("user_role");
+      safeLocalStorage.removeItem("user_name");
 
       // Update state
       dispatch({ type: "LOGOUT" });
@@ -269,14 +272,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Don't render children until auth is checked
   if (!initialized) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white">Verificando autenticação...</p>
-        </div>
-      </div>
-    );
+    return null; // We'll handle loading state in the page components
   }
 
   const value: AuthContextType = {

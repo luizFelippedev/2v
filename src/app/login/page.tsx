@@ -20,7 +20,6 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (authState.isAuthenticated && !authState.isLoading) {
-      console.log("User already authenticated, redirecting to admin...");
       router.push("/admin");
     }
   }, [authState.isAuthenticated, authState.isLoading, router]);
@@ -43,22 +42,17 @@ export default function LoginPage() {
     setLoginStatus("idle");
 
     try {
-      console.log("Attempting login with:", formData.email);
-      
       const success = await login(formData.email, formData.password);
-      console.log("Login result:", success);
 
       if (success) {
         setLoginStatus("success");
-        console.log("Login successful, redirecting to admin...");
-
+        
         // Small delay to show success state before redirect
         setTimeout(() => {
           router.push("/admin");
         }, 1000);
       } else {
         setLoginStatus("error");
-        console.error("Login failed - check credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
