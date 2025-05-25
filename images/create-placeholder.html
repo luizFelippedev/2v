@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criar Placeholder</title>
+</head>
+<body>
+    <h1>Criador de Imagem Placeholder</h1>
+    <button onclick="createPlaceholderImage()">Baixar placeholder-avatar.png</button>
+    <canvas id="canvas" style="border: 1px solid #ccc; margin-top: 20px;"></canvas>
+    
+    <script>
+        function createPlaceholderImage() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Definir tamanho
+            canvas.width = 200;
+            canvas.height = 200;
+            
+            // Fundo cinza escuro
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Desenhar um avatar simples
+            // Cabeça (círculo)
+            ctx.fillStyle = '#9CA3AF';
+            ctx.beginPath();
+            ctx.arc(100, 80, 30, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Corpo (retângulo arredondado)
+            ctx.beginPath();
+            ctx.roundRect(70, 120, 60, 60, 10);
+            ctx.fill();
+            
+            // Texto
+            ctx.fillStyle = '#D1D5DB';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('AVATAR', 100, 190);
+            
+            // Converter para blob e baixar
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'placeholder-avatar.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('Imagem baixada! Mova para public/images/');
+            });
+        }
+        
+        // Criar preview automaticamente
+        window.onload = function() {
+            createPlaceholderImage();
+        }
+    </script>
+</body>
+</html>
