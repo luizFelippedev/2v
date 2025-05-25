@@ -1,72 +1,130 @@
 // next.config.js
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Configurações básicas
   reactStrictMode: true,
-  swcMinify: true,
+  poweredByHeader: false,
+  compress: true,
   
-  // Configurações de performance
+  // Configurações básicas do servidor
+  serverRuntimeConfig: {
+    hostname: '0.0.0.0',
+    port: 3000
+  },
+  
+  // Configurações experimentais simplificadas
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['framer-motion', 'lucide-react']
   },
-
-  // Headers de segurança
+  
+  // Configurações do compilador
+  compiler: {
+    // Remove console.log em produção
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  
+  // Configurações de imagens
+  images: {
+    // Domínios permitidos para imagens externas
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**', // Permitir qualquer domínio HTTPS (ajuste conforme necessário)
+      }
+    ],
+    // Desabilitar otimização em desenvolvimento para velocidade
+    unoptimized: process.env.NODE_ENV === 'development',
+    // Formatos de imagem suportados
+    formats: ['image/webp', 'image/avif'],
+    // Tamanhos de imagem para responsividade
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  
+  // Configurações de headers de segurança atualizadas
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "img-src 'self' data: blob: https:",
+              "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "worker-src 'self'"
+            ].join('; ')
           }
         ]
       }
     ];
   },
-
-  // Configurar PWA
-  async rewrites() {
+  
+  // Configurações de webpack (se necessário)
+  webpack: (config, { dev, isServer }) => {
+    // Configurações personalizadas do webpack
+    if (!dev && !isServer) {
+      // Otimizações para produção no cliente
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@': require('path').resolve(__dirname),
+      };
+    }
+    
+    return config;
+  },
+  
+  // Configurações de redirects (se necessário)
+  async redirects() {
     return [
-      {
-        source: '/sw.js',
-        destination: '/api/sw'
-      }
+      // Exemplo de redirect
+      // {
+      //   source: '/old-page',
+      //   destination: '/new-page',
+      //   permanent: true,
+      // },
     ];
   },
-
-  // Otimizações de imagem
-  images: {
-    domains: ['via.placeholder.com', 'picsum.photos', 'ui-avatars.com'],
-    formats: ['image/webp', 'image/avif']
+  
+  // Configurações de rewrites (se necessário)
+  async rewrites() {
+    return [
+      // Exemplo de rewrite para API
+      // {
+      //   source: '/api/:path*',
+      //   destination: 'http://localhost:8000/api/:path*',
+      // },
+    ];
   },
-
-  // Compressão
-  compress: true,
-
-  // Bundle analyzer em desenvolvimento
-  ...(process.env.ANALYZE === 'true' && {
-    webpack: (config) => {
-      if (process.env.NODE_ENV === 'development') {
-        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
-            openAnalyzer: false,
-          })
-        );
-      }
-      return config;
-    }
-  })
+  
+  // Configurações de ambiente
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY || 'default-key',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+  },
+  
+  // Configurações de trailingSlash
+  trailingSlash: false,
+  
+  // Configurações de i18n (se necessário)
+  // i18n: {
+  //   locales: ['pt-BR', 'en'],
+  //   defaultLocale: 'pt-BR',
+  // },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

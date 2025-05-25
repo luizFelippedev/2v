@@ -1,18 +1,18 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 
 import { AppProviders } from "@/contexts";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeScript } from "@/contexts/ThemeContext";
-import { ThemeSelector } from "@/components/common/ThemeSelector";
-import { Analytics } from "@/components/common/Analytics";
-import { PWA } from "@/components/common/PWA";
-import { NoSSR } from "@/components/common/NoSSR";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { GlobalSearch } from "@/components/common/GlobalSearch";
-import { RegisterSW } from "@/components/common/RegisterSW";
+import { ThemeSelector } from "@/components/common";
+import { Analytics, PWAManager, RegisterSW } from "@/components/common";
+import { NoSSR } from "@/components/common";
+import { ErrorBoundary } from "@/components/ui";
+import { GlobalSearch } from "@/components/common";
 import "@/styles/globals.css";
 
 // Configuração da fonte com otimizações
@@ -54,8 +54,8 @@ export const metadata: Metadata = {
     "Brasil"
   ],
   
-  authors: [{ 
-    name: "Luiz Felippe", 
+  authors: [{
+    name: "Luiz Felippe",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"
   }],
   
@@ -197,6 +197,11 @@ const jsonLd = {
   ]
 };
 
+// Carregar componentes UI dinamicamente
+const DynamicUIComponents = dynamic(() => import('@/components/ui'), {
+  ssr: false
+});
+
 interface RootLayoutProps {
   children: React.ReactNode;
 }
@@ -270,7 +275,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               
               {/* PWA - apenas se habilitado */}
               {process.env.NEXT_PUBLIC_PWA_ENABLED === 'true' && (
-                <PWA />
+                <PWAManager />
               )}
               
               {/* Service Worker */}

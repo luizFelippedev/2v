@@ -21,6 +21,7 @@ import {
   Share2,
 } from "lucide-react";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useData } from "@/contexts";
 
 interface Certificate {
   id: string;

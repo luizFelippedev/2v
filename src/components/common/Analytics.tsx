@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -105,6 +105,22 @@ export function useAnalytics() {
 
 // Analytics Provider Component
 export function Analytics() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (typeof window.gtag === "undefined") return;
+
+    const pageView = (url: string) => {
+      window.gtag("config", process.env.NEXT_PUBLIC_GA_TRACKING_ID!, {
+        page_path: url,
+      });
+    };
+
+    // Enviar pageview no primeiro render
+    pageView(pathname + (searchParams?.toString() ? `?${searchParams}` : ""));
+  }, [pathname, searchParams]);
+
   return (
     <>
       {GA_TRACKING_ID && (

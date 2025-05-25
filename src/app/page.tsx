@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronDown,
@@ -19,9 +19,8 @@ import {
   Heart,
 } from "lucide-react";
 import Link from "next/link";
-import { useParticles } from "@/hooks/useParticles";
+import { useParticles } from "@/hooks";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { useAnimation } from "@/hooks";
 
 // Optimized Typed Text Component
 const TypedText: React.FC<{ texts: string[]; speed?: number }> = ({

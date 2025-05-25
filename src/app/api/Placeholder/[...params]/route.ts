@@ -1,52 +1,46 @@
-// app/api/placeholder/[...dimensions]/route.ts
+// app/api/placeholder/[...params]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { dimensions: string[] } }
+  { params }: { params: { params: string[] } }
 ) {
   try {
-    const { dimensions } = params;
+    // Extrair largura e altura dos parâmetros
+    const [width = "400", height = "300"] = params.params;
+    const w = parseInt(width);
+    const h = parseInt(height);
 
-    // Pega largura e altura dos parâmetros ou define padrão
-    const [widthStr, heightStr] = dimensions;
-    const width = parseInt(widthStr) || 400;
-    const height = parseInt(heightStr) || 300;
-
-    // Validação simples para evitar abusos
-    if (width < 1 || width > 2000 || height < 1 || height > 2000) {
+    // Validar dimensões
+    if (w < 1 || w > 2000 || h < 1 || h > 2000) {
       return NextResponse.json(
-        {
-          error:
-            "Invalid dimensions. Width and height must be between 1 and 2000.",
-        },
+        { error: "Dimensões inválidas (1-2000px)" },
         { status: 400 }
       );
     }
 
-    // Cria SVG dinâmico
+    // Gerar SVG placeholder
     const svg = `
-      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f3f4f6"/>
-        <rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="none" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-        <text x="50%" y="50%" font-family="system-ui, sans-serif" font-size="16" fill="#6b7280" text-anchor="middle" dy=".3em">
-          ${width} × ${height}
+      <svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#1e293b"/>
+        <rect x="2" y="2" width="${w - 4}" height="${h - 4}" fill="none" stroke="#475569" stroke-width="2"/>
+        <text x="50%" y="50%" font-family="ui-sans-serif, system-ui" font-size="16" fill="#94a3b8" text-anchor="middle" dy=".3em">
+          ${w} × ${h}
         </text>
       </svg>
     `;
 
-    // Retorna SVG com cabeçalhos apropriados
+    // Retornar SVG com headers corretos
     return new NextResponse(svg, {
-      status: 200,
       headers: {
         "Content-Type": "image/svg+xml",
-        "Cache-Control": "public, max-age=31536000", // cache de 1 ano
+        "Cache-Control": "public, max-age=31536000",
       },
     });
   } catch (error) {
-    console.error("Placeholder API error:", error);
+    console.error("Erro na API de placeholder:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Erro interno do servidor" },
       { status: 500 }
     );
   }

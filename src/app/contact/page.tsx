@@ -18,6 +18,8 @@ import {
   Zap,
   Heart,
 } from "lucide-react";
+import { useToast } from "@/hooks";
+import { useData } from "@/contexts";
 
 interface ContactForm {
   name: string;

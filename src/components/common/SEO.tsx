@@ -18,7 +18,7 @@ interface SEOProps {
 
 export const SEO: React.FC<SEOProps> = ({
   title,
-  description = "Portfolio profissional de João Silva - Desenvolvedor Full Stack especializado em React, Node.js e IA. Criando experiências digitais excepcionais.",
+  description = "Portfolio profissional de Luiz Felippe - Desenvolvedor Full Stack especializado em React, Node.js e IA. Criando experiências digitais excepcionais.",
   keywords = [
     "portfolio",
     "desenvolvedor",
@@ -32,7 +32,7 @@ export const SEO: React.FC<SEOProps> = ({
   type = "website",
   publishedTime,
   modifiedTime,
-  author = "João Silva",
+  author = "Luiz Felippe",
   canonical,
   noindex = false,
   nofollow = false,
@@ -42,8 +42,8 @@ export const SEO: React.FC<SEOProps> = ({
   const currentUrl = `${siteUrl}${pathname || ""}`;
 
   const pageTitle = title
-    ? `${title} | João Silva - Portfolio`
-    : "João Silva - Full Stack Developer & AI Specialist";
+    ? `${title} | Luiz Felippe - Portfolio`
+    : "Luiz Felippe - Full Stack Developer & AI Specialist";
 
   const fullImageUrl = image.startsWith("http") ? image : `${siteUrl}${image}`;
 
@@ -80,15 +80,15 @@ export const SEO: React.FC<SEOProps> = ({
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImageUrl} />
-      <meta property="og:image:alt" content={title || "João Silva Portfolio"} />
+      <meta property="og:image:alt" content={title || "Luiz Felippe Portfolio"} />
       <meta property="og:url" content={currentUrl} />
-      <meta property="og:site_name" content="João Silva Portfolio" />
+      <meta property="og:site_name" content="Luiz Felippe Portfolio" />
       <meta property="og:locale" content="pt_BR" />
 
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@joaosilva" />
-      <meta name="twitter:creator" content="@joaosilva" />
+      <meta name="twitter:site" content="@luizfelippe" />
+      <meta name="twitter:creator" content="@luizfelippe" />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={fullImageUrl} />
@@ -137,7 +137,7 @@ export const SEO: React.FC<SEOProps> = ({
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
-            name: "João Silva",
+            name: "Luiz Felippe",
             url: siteUrl,
             image: fullImageUrl,
             jobTitle: "Full Stack Developer",
@@ -145,7 +145,7 @@ export const SEO: React.FC<SEOProps> = ({
               "@type": "Organization",
               name: "Freelancer",
             },
-            alumniOf: "Universidade Federal",
+            alumniOf: "Unesa",
             knowsAbout: [
               "JavaScript",
               "TypeScript",
@@ -157,21 +157,12 @@ export const SEO: React.FC<SEOProps> = ({
               "Mobile Development",
             ],
             sameAs: [
-              "https://github.com/joaosilva",
-              "https://linkedin.com/in/joaosilva",
-              "https://twitter.com/joaosilva",
+              "https://github.com/luizfelippe",
+              "https://linkedin.com/in/luizfelippe",
+              "https://twitter.com/luizfelippe",
             ],
           }),
         }}
-      />
-
-      {/* Preload critical resources */}
-      <link
-        rel="preload"
-        href="/fonts/inter-var.woff2"
-        as="font"
-        type="font/woff2"
-        crossOrigin="anonymous"
       />
 
       {/* DNS Prefetch */}

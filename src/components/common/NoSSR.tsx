@@ -1,21 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
 
-interface NoSSRProps {
+export function NoSSR({ children, fallback = null }: { 
   children: React.ReactNode;
   fallback?: React.ReactNode;
-}
-
-export const NoSSR: React.FC<NoSSRProps> = ({ children, fallback = null }) => {
-  const [hasMounted, setHasMounted] = useState(false);
+}) {
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setHasMounted(true);
+    setIsMounted(true);
   }, []);
 
-  if (!hasMounted) {
-    return <>{fallback}</>;
+  if (!isMounted) {
+    return fallback;
   }
 
   return <>{children}</>;
-};
+}

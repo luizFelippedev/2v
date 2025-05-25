@@ -20,7 +20,7 @@ interface ThemeConfig {
   text: string;
 }
 
-interface ThemeState {
+export interface ThemeState {
   mode: "light" | "dark" | "cyberpunk" | "neon" | "matrix";
   customColors: ThemeConfig;
   animations: boolean;
@@ -33,7 +33,8 @@ type ThemeAction =
   | { type: "TOGGLE_ANIMATIONS" }
   | { type: "TOGGLE_PARTICLES" }
   | { type: "TOGGLE_GLASS_EFFECT" }
-  | { type: "HYDRATE"; payload: ThemeState };
+  | { type: "HYDRATE"; payload: ThemeState }
+  | { type: "UPDATE_COLORS"; payload: Partial<ThemeState["customColors"]> };
 
 interface ThemeContextType {
   theme: ThemeState;
@@ -42,6 +43,7 @@ interface ThemeContextType {
   toggleAnimations: () => void;
   toggleParticles: () => void;
   toggleGlassEffect: () => void;
+  updateColors: (colors: Partial<ThemeState["customColors"]>) => void;
   isLoaded: boolean;
 }
 
@@ -120,6 +122,11 @@ const themeReducer = (state: ThemeState, action: ThemeAction): ThemeState => {
       return { ...state, glassEffect: !state.glassEffect };
     case "HYDRATE":
       return { ...action.payload, customColors: themes[action.payload.mode] };
+    case "UPDATE_COLORS":
+      return {
+        ...state,
+        customColors: { ...state.customColors, ...action.payload },
+      };
     default:
       return state;
   }
@@ -264,6 +271,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     dispatch({ type: "TOGGLE_GLASS_EFFECT" });
   }, []);
 
+  const updateColors = useCallback((colors: Partial<ThemeState["customColors"]>) => {
+    dispatch({ type: "UPDATE_COLORS", payload: colors });
+  }, []);
+
   return (
     <ThemeContext.Provider
       value={{
@@ -273,6 +284,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleAnimations,
         toggleParticles,
         toggleGlassEffect,
+        updateColors,
         isLoaded,
       }}
     >

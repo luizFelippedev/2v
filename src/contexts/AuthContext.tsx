@@ -31,29 +31,28 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
     case "LOGIN_SUCCESS":
       return {
         ...state,
-        user: action.payload,
-        isAuthenticated: true,
         isLoading: false,
+        isAuthenticated: true,
+        user: action.payload,
         error: null,
       };
     case "LOGIN_FAILURE":
       return {
         ...state,
-        user: null,
-        isAuthenticated: false,
         isLoading: false,
+        isAuthenticated: false,
+        user: null,
         error: action.payload,
       };
     case "LOGOUT":
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       return {
         ...state,
-        user: null,
         isAuthenticated: false,
-        isLoading: false,
+        user: null,
         error: null,
       };
-    case "SET_LOADING":
-      return { ...state, isLoading: action.payload };
     default:
       return state;
   }
@@ -63,7 +62,13 @@ const AuthContext = createContext<{
   state: AuthState;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  forceLogin: (userData: User) => void; // Adicionar novo método
 } | undefined>(undefined);
+
+const clearAuthData = async (): Promise<void> => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -75,101 +80,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     error: null,
   });
 
-  // Verificar autenticação ao carregar
   useEffect(() => {
-    const checkAuth = async () => {
+    const initAuth = async () => {
       try {
-        const token = localStorage.getItem("portfolio_token");
-        const userEmail = localStorage.getItem("user_email");
-        const userName = localStorage.getItem("user_name");
-        const userRole = localStorage.getItem("user_role");
-
-        if (token && userEmail && userName && userRole) {
-          // Verificar se o token ainda é válido
-          const tokenParts = token.split("-");
-          const tokenTimestamp = parseInt(tokenParts[tokenParts.length - 1]);
-          const now = Date.now();
-          const oneDay = 24 * 60 * 60 * 1000; // 24 horas
-
-          if (now - tokenTimestamp < oneDay) {
-            const user: User = {
-              id: "1",
-              name: userName,
-              email: userEmail,
-              role: userRole as "admin" | "user",
-              avatar: "/api/placeholder/40/40",
-            };
-
-            // Definir cookie para o middleware
-            document.cookie = `portfolio_token=${token}; path=/; max-age=86400; SameSite=Strict`;
-
-            dispatch({ type: "LOGIN_SUCCESS", payload: user });
-          } else {
-            // Token expirado
-            await clearAuthData();
-            dispatch({ type: "LOGOUT" });
-          }
-        } else {
-          dispatch({ type: "LOGOUT" });
+        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
+        
+        if (storedUser && storedToken) {
+          const user = JSON.parse(storedUser);
+          dispatch({ type: "LOGIN_SUCCESS", payload: user });
         }
       } catch (error) {
-        console.error("Erro ao verificar autenticação:", error);
-        await clearAuthData();
-        dispatch({ type: "LOGOUT" });
+        console.error("Erro ao inicializar auth:", error);
+      } finally {
+        dispatch({ type: "SET_LOADING", payload: false });
       }
     };
 
-    checkAuth();
+    initAuth();
   }, []);
 
-  const clearAuthData = async () => {
-    localStorage.removeItem("portfolio_token");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_name");
-    localStorage.removeItem("user_role");
-    document.cookie = "portfolio_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-  };
-
+  // Modificar o login para usar redirecionamento direto
   const login = async (email: string, password: string): Promise<boolean> => {
-    dispatch({ type: "LOGIN_START" });
-
     try {
-      // Simular API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const validCredentials = [
-        { email: "admin@portfolio.com", password: "admin123", role: "admin", name: "Admin" },
-        { email: "luizfelippeandrade@outlook.com", password: "123456", role: "admin", name: "Luiz Felippe" },
-      ];
-
-      const credential = validCredentials.find(
-        (cred) => cred.email === email && cred.password === password
-      );
-
-      if (credential) {
-        const user: User = {
+      dispatch({ type: "LOGIN_START" });
+      
+      if (email === "admin@portfolio.com" && password === "admin123") {
+        const user = {
           id: "1",
-          name: credential.name,
-          email: credential.email,
-          role: credential.role as "admin",
-          avatar: "/api/placeholder/40/40",
+          name: "Admin",
+          email: "admin@portfolio.com",
+          role: "admin" as const,
+          avatar: "/images/placeholder-avatar.png"
         };
-
-        // Salvar no localStorage
-        const token = `demo-jwt-token-${Date.now()}`;
-        localStorage.setItem("portfolio_token", token);
-        localStorage.setItem("user_email", user.email);
-        localStorage.setItem("user_name", user.name);
-        localStorage.setItem("user_role", user.role);
-
-        // Definir cookie para o middleware
-        document.cookie = `portfolio_token=${token}; path=/; max-age=86400; SameSite=Strict`;
-
+        
+        const token = btoa(JSON.stringify({
+          userId: user.id,
+          exp: Date.now() + (24 * 60 * 60 * 1000)
+        }));
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
         return true;
-      } else {
-        throw new Error("Credenciais inválidas");
       }
+      
+      throw new Error("Credenciais inválidas");
     } catch (error: any) {
       dispatch({ type: "LOGIN_FAILURE", payload: error.message });
       return false;
@@ -185,8 +142,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const forceLogin = (userData: User): void => {
+    const token = btoa(JSON.stringify({
+      userId: userData.id,
+      exp: Date.now() + (24 * 60 * 60 * 1000)
+    }));
+    
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    dispatch({ type: "LOGIN_SUCCESS", payload: userData });
+  };
+
   return (
-    <AuthContext.Provider value={{ state, login, logout }}>
+    <AuthContext.Provider value={{ state, login, logout, forceLogin }}>
       {children}
     </AuthContext.Provider>
   );
@@ -199,3 +167,29 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Modificar loginAdmin
+if (typeof window !== 'undefined') {
+  window.loginAdmin = () => {
+    const adminUser = {
+      id: "1",
+      name: "Admin",
+      email: "admin@portfolio.com",
+      role: "admin",
+      avatar: "/images/placeholder-avatar.png"
+    };
+    
+    localStorage.setItem('token', btoa(JSON.stringify({userId:"1",exp:Date.now()+86400000})));
+    localStorage.setItem('user', JSON.stringify(adminUser));
+    
+    // Usar replace para evitar histórico
+    window.location.replace('/admin');
+  };
+}
+
+// Atualizar a declaração global
+declare global {
+  interface Window {
+    loginAdmin: () => void;
+  }
+}

@@ -23,7 +23,7 @@ import {
   GlassWater,
   Users,
 } from "lucide-react";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useIntersectionObserver } from "@/hooks";
 import { useAuth } from "@/contexts";
 
 export default function AboutPage() {

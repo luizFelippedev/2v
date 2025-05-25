@@ -610,3 +610,8 @@ export const apiUtils = {
     return "Ocorreu um erro inesperado";
   },
 };
+
+
+export * from './analytics';
+export * from './performance';
+export * from './placeholder';

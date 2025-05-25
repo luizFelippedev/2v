@@ -22,8 +22,9 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
+    // Verificar se já está autenticado ao carregar
     if (authState.isAuthenticated && !authState.isLoading) {
-      router.push("/admin");
+      router.replace('/admin');
     }
   }, [authState.isAuthenticated, authState.isLoading, router]);
 
@@ -38,7 +39,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (isSubmitting) return;
 
     setIsSubmitting(true);
@@ -46,14 +46,9 @@ export default function LoginPage() {
 
     try {
       const success = await login(formData.email, formData.password);
-
       if (success) {
         setLoginStatus("success");
-        
-        // Small delay to show success state before redirect
-        setTimeout(() => {
-          router.push("/admin");
-        }, 1000);
+        router.replace('/admin');
       } else {
         setLoginStatus("error");
       }
@@ -89,11 +84,6 @@ export default function LoginPage() {
         </div>
       </div>
     );
-  }
-
-  // Don't show login if already authenticated
-  if (authState.isAuthenticated) {
-    return null;
   }
 
   const isSuccessStatus = loginStatus === "success";
@@ -169,6 +159,7 @@ export default function LoginPage() {
                       placeholder="Digite seu email"
                       required
                       disabled={isSubmitting}
+                      autoComplete="username"
                     />
                   </div>
 
@@ -186,6 +177,7 @@ export default function LoginPage() {
                         placeholder="Digite sua senha"
                         required
                         disabled={isSubmitting}
+                        autoComplete="current-password"
                       />
                       <button
                         type="button"

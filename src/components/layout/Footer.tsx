@@ -24,25 +24,25 @@ export const Footer: React.FC = () => {
     {
       name: "GitHub",
       icon: <Github className="w-5 h-5" />,
-      href: "https://github.com/joaosilva",
+      href: "https://github.com/luizfelippe",
       color: "hover:text-gray-300",
     },
     {
       name: "LinkedIn",
       icon: <Linkedin className="w-5 h-5" />,
-      href: "https://linkedin.com/in/joaosilva",
+      href: "https://linkedin.com/in/luizfelippe",
       color: "hover:text-blue-400",
     },
     {
       name: "Twitter",
       icon: <Twitter className="w-5 h-5" />,
-      href: "https://twitter.com/joaosilva",
+      href: "https://twitter.com/luizfelippe",
       color: "hover:text-blue-400",
     },
     {
       name: "Email",
       icon: <Mail className="w-5 h-5" />,
-      href: "mailto:joao@portfolio.com",
+      href: "mailto:luizfelippeandrade@outlook.com",
       color: "hover:text-primary-400",
     },
   ];
@@ -95,7 +95,7 @@ export const Footer: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-                  João Silva
+                  Luiz Felippe
                 </h3>
                 <p className="text-gray-400 text-sm">Full Stack Developer</p>
               </div>

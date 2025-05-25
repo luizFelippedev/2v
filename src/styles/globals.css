@@ -2,6 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-primary: 14 165 233;
+    --color-secondary: 139 92 246;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-gray-900 text-gray-100 antialiased;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
+
+  .gradient-border {
+    @apply relative before:absolute before:inset-0 before:-z-10 before:p-[1px] before:bg-gradient-to-r before:from-primary-500 before:to-secondary-500 before:rounded-[inherit] before:content-[''];
+  }
+}
+
+@layer utilities {
+  .mask-gradient-down {
+    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  }
+
+  .mask-gradient-up {
+    mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+/* Customizações Scrollbar */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full hover:bg-gray-500 transition-colors;
+}
+
+/* Estilos para seleção de texto */
+::selection {
+  @apply bg-primary-500/30 text-white;
+}
+
 /* CSS Variables para temas */
 :root {
   /* Tema padrão (dark) */
@@ -348,4 +409,12 @@ body {
     background: white !important;
     color: black !important;
   }
+}
+
+/* Adicionar fonte Inter localmente */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
 }

@@ -68,7 +68,7 @@ export const Navbar: React.FC = () => {
                 <Code className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-                Portfolio Pro
+                Luiz Felippe
               </span>
             </motion.div>
           </Link>

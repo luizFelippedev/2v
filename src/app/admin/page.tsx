@@ -16,10 +16,18 @@ import {
   ChevronRight,
   LogOut,
   AlertCircle,
+  FileText,
+  ThumbsUp, // Adicionando importação do ThumbsUp
+  Share2,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/contexts";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { DashboardGrid } from "@/components/admin/DashboardGrid";
+import { MetricsCard } from "@/components/admin/MetricsCard";
+import { ActivityStream } from "@/components/admin/ActivityStream";
+import { Card } from "@/components/ui/Card";
 
 // Admin Dashboard Component
 export default function AdminDashboard() {
@@ -28,33 +36,14 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(activeTabParam || "overview");
   const { state: authState, logout } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Check authentication on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Aguardar um momento para o contexto de auth inicializar
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        if (!authState.isAuthenticated) {
-          console.log("Usuário não autenticado, redirecionando para login...");
-          router.replace("/login");
-          return;
-        }
-
-        console.log("Usuário autenticado:", authState.user?.email);
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao verificar autenticação:", error);
-        setError("Erro ao verificar autenticação");
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [authState.isAuthenticated, router]);
+    if (!authState.isLoading && !authState.isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [authState.isAuthenticated, authState.isLoading, router]);
 
   // Handle tab changes from URL
   useEffect(() => {
@@ -80,16 +69,58 @@ export default function AdminDashboard() {
     }
   };
 
+  // Mock data para os widgets
+  const dashboardWidgets = [
+    {
+      id: "visits",
+      title: "Visitas",
+      type: "metric" as const,
+      size: "small" as const, // Especificar literalmente como "small"
+      component: (
+        <MetricsCard
+          data={{
+            value: 15234,
+            previousValue: 12500,
+            label: "Visitas este mês",
+            type: "number",
+            color: "#3b82f6",
+          }}
+        />
+      ),
+    },
+    {
+      id: "projects",
+      title: "Projetos",
+      type: "metric" as const,
+      size: "small" as const, // Especificar literalmente como "small"
+      component: (
+        <MetricsCard
+          data={{
+            value: 52,
+            previousValue: 45,
+            label: "Projetos totais",
+            type: "number",
+            color: "#10b981",
+          }}
+        />
+      ),
+    },
+    {
+      id: "activity",
+      title: "Atividades Recentes",
+      type: "list" as const,
+      size: "large" as const, // Especificar literalmente como "large"
+      component: <ActivityStream />,
+    },
+  ];
+
   // Display loading state
-  if (loading) {
+  if (authState.isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 pt-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-white">
-            Carregando dashboard...
-          </h2>
-          <p className="text-slate-400 mt-2">Verificando credenciais</p>
+          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Carregando dashboard...</p>
         </div>
       </div>
     );
@@ -138,40 +169,22 @@ export default function AdminDashboard() {
     );
   }
 
-  // Dashboard tabs
-  const tabs = [
-    {
-      id: "overview",
-      label: "Visão Geral",
-      icon: <BarChart3 className="w-5 h-5" />,
-    },
-    {
-      id: "projects",
-      label: "Projetos",
-      icon: <Briefcase className="w-5 h-5" />,
-    },
-    {
-      id: "certificates",
-      label: "Certificados",
-      icon: <Award className="w-5 h-5" />,
-    },
-    {
-      id: "settings",
-      label: "Configurações",
-      icon: <Settings className="w-5 h-5" />,
-    },
+  const stats = [
+    { label: "Usuários", value: "150+", icon: Users, change: "+12%" },
+    { label: "Projetos", value: "45", icon: FileText, change: "+5%" },
+    { label: "Certificados", value: "28", icon: Award, change: "+2%" },
+    { label: "Visitas", value: "10k+", icon: Activity, change: "+25%" },
   ];
 
-  // Mock stats data
-  const stats = {
-    totalProjects: 12,
-    totalCertificates: 8,
-    totalUsers: 1247,
-    totalViews: 45231,
-  };
+  const metrics = [
+    { label: "Visualizações", value: "25.5k", icon: Eye },
+    { label: "Curtidas", value: "1.2k", icon: ThumbsUp },
+    { label: "Compartilhamentos", value: "845", icon: Share2 },
+    { label: "Comentários", value: "328", icon: MessageSquare },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -211,100 +224,67 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
 
-        {/* Statistics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-        >
-          {[
-            {
-              title: "Projetos",
-              value: stats.totalProjects,
-              icon: <Briefcase className="w-5 h-5" />,
-              color: "bg-blue-500",
-              href: "/admin?tab=projects",
-            },
-            {
-              title: "Certificados",
-              value: stats.totalCertificates,
-              icon: <Award className="w-5 h-5" />,
-              color: "bg-green-500",
-              href: "/admin?tab=certificates",
-            },
-            {
-              title: "Usuários",
-              value: stats.totalUsers,
-              icon: <Users className="w-5 h-5" />,
-              color: "bg-purple-500",
-              href: "#",
-            },
-            {
-              title: "Visualizações",
-              value: stats.totalViews,
-              icon: <Eye className="w-5 h-5" />,
-              color: "bg-orange-500",
-              href: "#",
-            },
-          ].map((stat, index) => (
-            <Link key={stat.title} href={stat.href}>
-              <motion.div
-                whileHover={{ scale: 1.02, y: -2 }}
-                className="bg-slate-800 rounded-2xl border border-slate-700 p-6 cursor-pointer hover:bg-slate-700 transition-colors"
-              >
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card hover={false} className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div
-                    className={`p-3 rounded-xl ${stat.color} text-white`}
-                  >
-                    {stat.icon}
+                  <div className="p-2 bg-primary-500/10 rounded-lg">
+                    <stat.icon className="w-6 h-6 text-primary-500" />
                   </div>
+                  <span
+                    className={`text-sm ${
+                      stat.change.startsWith("+")
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {stat.change}
+                  </span>
                 </div>
-                <div className="text-2xl font-bold text-white mb-1">
-                  {stat.value.toLocaleString()}
-                </div>
-                <div className="text-sm text-slate-400">{stat.title}</div>
-              </motion.div>
-            </Link>
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {stat.value}
+                </h3>
+                <p className="text-gray-400 text-sm">{stat.label}</p>
+              </Card>
+            </motion.div>
           ))}
-        </motion.div>
-
-        {/* Tabs */}
-        <div className="mb-8">
-          <div className="flex space-x-1 bg-slate-800 rounded-2xl border border-slate-700 p-2">
-            {tabs.map((tab) => (
-              <motion.button
-                key={tab.id}
-                whileHover={{ scale: 1.02 }}
-                onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all ${
-                  activeTab === tab.id
-                    ? "bg-blue-500 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700"
-                }`}
-              >
-                {tab.icon}
-                <span className="text-sm font-medium">{tab.label}</span>
-              </motion.button>
-            ))}
-          </div>
         </div>
 
-        {/* Tab Content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {activeTab === "overview" && <OverviewTab />}
-            {activeTab === "projects" && <ProjectsTab />}
-            {activeTab === "certificates" && <CertificatesTab />}
-            {activeTab === "settings" && <SettingsTab />}
-          </motion.div>
-        </AnimatePresence>
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {metrics.map((metric, index) => (
+            <motion.div
+              key={metric.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 + 0.4 }}
+            >
+              <Card hover={false} className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="p-2 bg-white/5 rounded-lg">
+                    <metric.icon className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">{metric.label}</p>
+                    <p className="text-xl font-semibold text-white">
+                      {metric.value}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Grid de Widgets */}
+        <DashboardGrid initialItems={dashboardWidgets} />
       </div>
     </div>
   );
@@ -349,8 +329,8 @@ const OverviewTab: React.FC = () => (
                   activity.type === "project"
                     ? "bg-blue-500/20 text-blue-400"
                     : activity.type === "certificate"
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-orange-500/20 text-orange-400"
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-orange-500/20 text-orange-400"
                 }`}
               >
                 {activity.type === "project" && (

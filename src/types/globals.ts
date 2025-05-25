@@ -503,9 +503,6 @@ declare global {
   // Environment variables
   namespace NodeJS {
     interface ProcessEnv {
-      // Base environment
-      NODE_ENV: "development" | "production" | "test";
-
       // Application URLs
       NEXT_PUBLIC_APP_URL: string;
       NEXT_PUBLIC_API_URL: string;
@@ -596,15 +593,6 @@ declare global {
   }
 }
 
-// Socket.IO extension
-declare module "socket.io-client" {
-  interface Socket {
-    userId?: string;
-    userRole?: string;
-    isAuthenticated?: boolean;
-  }
-}
-
 // Framer Motion extensions
 declare module "framer-motion" {
   interface AnimationProps {
@@ -614,7 +602,7 @@ declare module "framer-motion" {
 
 // Next.js extensions
 declare module "next/router" {
-  interface NextRouter {
+  export interface Router {
     query: {
       [key: string]: string | string[] | undefined;
     };
@@ -628,23 +616,8 @@ declare module "react" {
   }
 }
 
-// Tailwind CSS IntelliSense
-declare module "tailwindcss/lib/util/flattenColorPalette" {
-  function flattenColorPalette(colors: any): any;
-  export = flattenColorPalette;
-}
-
 // Export types for easier importing
-export type {
-  DeepPartial,
-  Nullable,
-  Optional,
-  RequiredBy,
-  ApiMethod,
-  ApiRequestConfig,
-  FormField,
-  FormConfig,
-};
+
 
 // Re-export commonly used React types
 export type {

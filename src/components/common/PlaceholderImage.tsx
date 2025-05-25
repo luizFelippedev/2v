@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { User, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+import { User, Image as ImageIcon } from "lucide-react"; // Corrija aqui
 
 interface PlaceholderImageProps {
   width: number;
@@ -10,6 +11,9 @@ interface PlaceholderImageProps {
   type?: "profile" | "project" | "certificate" | "general";
   text?: string;
   borderRadius?: "none" | "sm" | "md" | "lg" | "full";
+  showDimensions?: boolean;
+  bgColor?: string;
+  textColor?: string;
 }
 
 export const PlaceholderImage: React.FC<PlaceholderImageProps> = ({
@@ -20,6 +24,9 @@ export const PlaceholderImage: React.FC<PlaceholderImageProps> = ({
   type = "general",
   text,
   borderRadius = "md",
+  showDimensions = true,
+  bgColor = "#1e293b",
+  textColor = "#94a3b8",
 }) => {
   const [useExternal, setUseExternal] = useState(true);
   const [imageError, setImageError] = useState(false);
@@ -57,7 +64,7 @@ export const PlaceholderImage: React.FC<PlaceholderImageProps> = ({
     }
   };
 
-  const displayText = text || `${width}×${height}`;
+  const displayText = text || (showDimensions ? `${width} × ${height}` : "");
 
   // Tentar usar serviço externo primeiro
   if (useExternal && !imageError) {
@@ -87,25 +94,27 @@ export const PlaceholderImage: React.FC<PlaceholderImageProps> = ({
   }
 
   // Fallback para SVG gerado
+  const svg = `
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="${bgColor}"/>
+      <rect x="2" y="2" width="${width - 4}" height="${height - 4}" fill="none" stroke="${textColor}" stroke-width="2"/>
+      <text x="50%" y="50%" font-family="ui-sans-serif, system-ui" font-size="16" fill="${textColor}" text-anchor="middle" dy=".3em">
+        ${displayText}
+      </text>
+    </svg>
+  `;
+
+  const svgUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
   return (
-    <div
-      className={`
-        flex items-center justify-center 
-        bg-gradient-to-br ${getGradientColors()}
-        ${borderRadiusClasses[borderRadius]}
-        ${className}
-      `}
-      style={{ width, height }}
-    >
-      <div className="flex flex-col items-center justify-center text-center p-2">
-        {getIcon()}
-        {width > 100 && height > 100 && (
-          <span className="text-white text-xs mt-1 font-medium">
-            {displayText}
-          </span>
-        )}
-      </div>
-    </div>
+    <Image
+      src={svgUrl}
+      alt={displayText}
+      width={width}
+      height={height}
+      className={className}
+      priority
+    />
   );
 };
 

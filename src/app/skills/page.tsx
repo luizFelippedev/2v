@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Target,
 } from "lucide-react";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useIntersectionObserver } from "@/hooks";
 import {
   FaReact,
   FaNodeJs,
