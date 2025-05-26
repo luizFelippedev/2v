@@ -1,21 +1,31 @@
-// src/contexts/AuthContext.tsx - Versão Corrigida
+// AuthContext.tsx corrigido
 "use client";
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, AuthState, AuthAction } from "@/types";
 
-interface AuthProviderProps {
-  children: React.ReactNode;
+// Tipos
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
 }
 
-const AuthContext = createContext<{
-  state: AuthState;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
-  clearError: () => void;
-} | undefined>(undefined);
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
 
-export { AuthContext };
+type AuthAction =
+  | { type: "LOGIN_START" }
+  | { type: "LOGIN_SUCCESS"; payload: User }
+  | { type: "LOGIN_FAILURE"; payload: string }
+  | { type: "LOGOUT" }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "CLEAR_ERROR" };
 
 // Usuários válidos para demonstração
 const VALID_USERS = [
@@ -24,7 +34,7 @@ const VALID_USERS = [
     name: "Admin",
     email: "admin@portfolio.com",
     password: "admin123",
-    role: "admin" as const,
+    role: "admin",
     avatar: "/images/placeholder-avatar.png"
   },
   {
@@ -32,7 +42,7 @@ const VALID_USERS = [
     name: "Luiz Felippe",
     email: "luizfelippeandrade@outlook.com",
     password: "123456",
-    role: "admin" as const,
+    role: "admin",
     avatar: "/images/placeholder-avatar.png"
   }
 ];
@@ -74,7 +84,14 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthContext = createContext<{
+  state: AuthState;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  clearError: () => void;
+} | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     isAuthenticated: false,
@@ -88,26 +105,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const storedUser = localStorage.getItem('auth_user');
-        const storedToken = localStorage.getItem('auth_token');
-        
-        if (storedUser && storedToken) {
-          const user = JSON.parse(storedUser);
+        if (typeof window !== 'undefined') {
+          const storedUser = localStorage.getItem('auth_user');
+          const storedToken = localStorage.getItem('auth_token');
           
-          // Verificar se o token não expirou
-          const token = JSON.parse(atob(storedToken));
-          if (token.exp > Date.now()) {
-            dispatch({ type: "LOGIN_SUCCESS", payload: user });
-          } else {
-            // Token expirado, limpar dados
-            localStorage.removeItem('auth_user');
-            localStorage.removeItem('auth_token');
+          if (storedUser && storedToken) {
+            const user = JSON.parse(storedUser);
+            
+            // Verificar se o token não expirou
+            const token = JSON.parse(atob(storedToken));
+            if (token.exp > Date.now()) {
+              dispatch({ type: "LOGIN_SUCCESS", payload: user });
+            } else {
+              // Token expirado, limpar dados
+              localStorage.removeItem('auth_user');
+              localStorage.removeItem('auth_token');
+            }
           }
         }
       } catch (error) {
         console.error("Erro ao inicializar auth:", error);
-        localStorage.removeItem('auth_user');
-        localStorage.removeItem('auth_token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_user');
+          localStorage.removeItem('auth_token');
+        }
       } finally {
         dispatch({ type: "SET_LOADING", payload: false });
       }
@@ -176,42 +197,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth deve ser usado dentro de AuthProvider");
   }
   return context;
-};
-
-// Helper global para debug (apenas desenvolvimento)
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).debugAuth = {
-    loginAdmin: () => {
-      const adminUser = VALID_USERS[0];
-      const user = {
-        id: adminUser.id,
-        name: adminUser.name,
-        email: adminUser.email,
-        role: adminUser.role,
-        avatar: adminUser.avatar
-      };
-      
-      const token = btoa(JSON.stringify({
-        userId: user.id,
-        exp: Date.now() + (24 * 60 * 60 * 1000)
-      }));
-      
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('auth_user', JSON.stringify(user));
-      window.location.href = '/admin';
-    },
-    logout: () => {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
-      window.location.href = '/login';
-    }
-  };
 }
