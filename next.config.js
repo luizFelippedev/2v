@@ -62,11 +62,12 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' data: blob: https:",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https: http:",
               "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "worker-src 'self'"
+              "worker-src 'self'",
+              "manifest-src 'self'"
             ].join('; ')
           }
         ]
@@ -84,6 +85,11 @@ const nextConfig = {
         '@': require('path').resolve(__dirname),
       };
     }
+    
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
     
     return config;
   },
