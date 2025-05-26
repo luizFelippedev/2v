@@ -9,6 +9,8 @@ export function useScrollPosition() {
   });
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     let ticking = false;
     let lastScrollY = window.scrollY;
 

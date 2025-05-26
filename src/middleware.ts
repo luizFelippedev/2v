@@ -4,11 +4,13 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   // Verificar token de autenticação para rotas protegidas
-  const isAuthenticated = request.cookies.get("auth_token");
+  const isAuthenticated = request.cookies.get("auth_token") || request.cookies.get("portfolio_token");
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   
   if (isAdminRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Adicionar headers de segurança

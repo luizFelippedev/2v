@@ -14,6 +14,7 @@ export function useInView<T extends Element = Element>(
   const { threshold = 0, rootMargin = '0px', once = false } = options;
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const element = ref.current;
     if (!element) return;
 

@@ -8,6 +8,7 @@ export const useIntersectionObserver = (
   const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const element = elementRef.current;
     if (!element) return;
 

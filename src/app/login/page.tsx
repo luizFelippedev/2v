@@ -22,18 +22,17 @@ export default function LoginPage() {
 
   // Effect to handle redirection after authentication status is determined
   useEffect(() => {
-    // Only redirect if authState is NOT loading and isAuthenticated is true
-    if (!authState.isLoading && authState.isAuthenticated) {
-      // If we just had a successful login on this page, show animation then redirect
-      if (showSuccessAnimation) {
-        const timer = setTimeout(() => {
-          router.replace(callbackUrl);
-        }, 1500); // Give 1.5s for success animation
-        return () => clearTimeout(timer); // Cleanup timer
-      } else {
-        // If already authenticated on page load (e.g., re-visiting login page while logged in), redirect immediately
+    // Redireciona imediatamente se já autenticado e não está mostrando animação de sucesso
+    if (!authState.isLoading && authState.isAuthenticated && !showSuccessAnimation) {
+      router.replace(callbackUrl);
+      return;
+    }
+    // Se login acabou de acontecer, mostra animação e redireciona após 1.5s
+    if (showSuccessAnimation) {
+      const timer = setTimeout(() => {
         router.replace(callbackUrl);
-      }
+      }, 1500);
+      return () => clearTimeout(timer);
     }
   }, [authState.isAuthenticated, authState.isLoading, router, callbackUrl, showSuccessAnimation]);
 

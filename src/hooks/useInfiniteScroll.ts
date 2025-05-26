@@ -32,6 +32,7 @@ export function useInfiniteScroll<T extends Element>(
   }, [onIntersect, isLoading]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const element = targetRef.current;
     if (!element) return;
 

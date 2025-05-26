@@ -11,9 +11,8 @@ import {
 import { localStorage } from "@/utils";
 
 // Create axios instance
-const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
-  timeout: 10000,
+export const api: AxiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
   headers: {
     "Content-Type": "application/json",
   },
@@ -538,9 +537,6 @@ function getSessionId(): string {
   }
   return sessionId;
 }
-
-// Export the configured axios instance for custom requests
-export { api };
 
 // Health check
 export const healthService = {
