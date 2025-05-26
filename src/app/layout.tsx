@@ -1,12 +1,14 @@
-// src/app/layout.tsx - Versão sem SW em desenvolvimento
+// src/app/layout.tsx
+
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ErrorBoundary } from "@/components/ui";
+import { AppProviders } from "@/contexts"; // Importa o provedor combinado
+import { Navbar } from "@/components/layout/Navbar";
 import "@/styles/globals.css";
+import { Footer } from "@/components/layout/Footer";
 
-// Configuração da fonte
+
+// Fonte
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -15,17 +17,15 @@ const inter = Inter({
   fallback: ["system-ui", "arial"],
 });
 
-// Metadados SEO
+// SEO
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"),
-  
   title: {
     default: "Luiz Felippe - Engenheiro de Software Full Stack",
-    template: "%s | Luiz Felippe Portfolio"
+    template: "%s | Luiz Felippe Portfolio",
   },
-  
-  description: "Portfolio profissional de Luiz Felippe - Engenheiro de Software Full Stack especializado em React, Node.js, TypeScript e Inteligência Artificial.",
-  
+  description:
+    "Portfolio profissional de Luiz Felippe - Engenheiro de Software Full Stack especializado em React, Node.js, TypeScript e Inteligência Artificial.",
   keywords: [
     "Luiz Felippe",
     "Engenheiro de Software",
@@ -37,92 +37,68 @@ export const metadata: Metadata = {
     "Python",
     "Portfolio",
     "São Paulo",
-    "Brasil"
+    "Brasil",
   ],
-  
-  authors: [{
-    name: "Luiz Felippe",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev"
-  }],
-  
+  authors: [
+    {
+      name: "Luiz Felippe",
+      url: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev",
+    },
+  ],
   robots: {
     index: true,
     follow: true,
   },
-  
   openGraph: {
     type: "website",
     locale: "pt_BR",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://luizfelippe.dev",
     title: "Luiz Felippe - Engenheiro de Software Full Stack",
-    description: "Portfolio profissional de Luiz Felippe - Especialista em React, Node.js, TypeScript e IA.",
+    description:
+      "Portfolio profissional de Luiz Felippe - Especialista em React, Node.js, TypeScript e IA.",
     siteName: "Luiz Felippe Portfolio",
   },
-  
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-    ],
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
   },
-
-  manifest: '/manifest.json',
+  manifest: "/manifest.json",
 };
 
 // Viewport
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' }
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
 };
 
-"use client";
-
+// Layout
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html
-      lang="pt-BR"
-      className={`${inter.variable} scroll-smooth`}
-      suppressHydrationWarning
-    >
-      <body 
-        className={`${inter.className} antialiased bg-background text-foreground overflow-x-hidden`}
-        suppressHydrationWarning
-      >
-        <a 
+    <html lang="pt-BR" className={`${inter.variable} scroll-smooth`} suppressHydrationWarning>
+      <body className={`${inter.className} antialiased bg-background text-foreground overflow-x-hidden`} suppressHydrationWarning>
+        <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-lg z-50"
         >
           Pular para o conteúdo principal
         </a>
-
-        <ErrorBoundary>
-          <ThemeProvider>
-            <AuthProvider>
-              <main id="main-content" className="min-h-screen">
-                {children}
-              </main>
-            </AuthProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+        <AppProviders>
+          <Navbar />
+          <main id="main-content" className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </AppProviders>
       </body>
     </html>
   );
 }
-
-// Configurações de metadados
-export const metadata = {
-  title: 'Portfolio',
-  description: 'Portfolio Profissional',
-  icons: {
-    icon: '/favicon.ico',
-  },
-};

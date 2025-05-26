@@ -1,4 +1,3 @@
-// src/contexts/index.ts
 "use client";
 
 // Exportações simples dos hooks e providers
@@ -12,14 +11,14 @@ import { AuthProvider } from './AuthContext';
 import { ThemeProvider } from './ThemeContext';
 import { DataProvider } from './DataContext';
 
-export const AppProviders: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <DataProvider>{children}</DataProvider>
-        </AuthProvider>
+        <DataProvider>
+        {children}
+        </DataProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 };

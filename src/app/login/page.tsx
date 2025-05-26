@@ -1,10 +1,10 @@
-// src/app/login/page.tsx (corrigido)
+// src/app/login/page.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Shield, Eye, EyeOff, AlertCircle, LogIn, CheckCircle, Loader } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, LogIn, CheckCircle, Loader, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -14,23 +14,36 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false); // New state for animation
   const { state: authState, login, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/admin';
 
-  // Redirect se já autenticado
+  // Effect to handle redirection after authentication status is determined
   useEffect(() => {
-    if (authState.isAuthenticated && !authState.isLoading) {
-      router.replace('/admin');
+    // Only redirect if authState is NOT loading and isAuthenticated is true
+    if (!authState.isLoading && authState.isAuthenticated) {
+      // If we just had a successful login on this page, show animation then redirect
+      if (showSuccessAnimation) {
+        const timer = setTimeout(() => {
+          router.replace(callbackUrl);
+        }, 1500); // Give 1.5s for success animation
+        return () => clearTimeout(timer); // Cleanup timer
+      } else {
+        // If already authenticated on page load (e.g., re-visiting login page while logged in), redirect immediately
+        router.replace(callbackUrl);
+      }
     }
-  }, [authState.isAuthenticated, authState.isLoading, router]);
+  }, [authState.isAuthenticated, authState.isLoading, router, callbackUrl, showSuccessAnimation]);
 
-  // Limpar erro quando usuário digita
+  // Clear error when user types
   useEffect(() => {
-    if (authState.error) {
+    if (authState.error && (formData.email !== "" || formData.password !== "")) {
       clearError();
     }
   }, [formData.email, formData.password, clearError, authState.error]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,25 +55,22 @@ export default function LoginPage() {
     if (isSubmitting) return;
 
     setIsSubmitting(true);
-    setLoginSuccess(false);
+    setShowSuccessAnimation(false); // Reset animation state on new submission
 
     try {
       const success = await login(formData.email, formData.password);
       if (success) {
-        setLoginSuccess(true);
-        // Aguardar um pouco antes de redirecionar para mostrar sucesso
-        setTimeout(() => {
-          router.push('/admin');
-        }, 1500);
+        setShowSuccessAnimation(true); // Trigger success animation and subsequent redirect via useEffect
       }
     } catch (error) {
-      console.error("Login error:", error);
+      // Error handling is managed by useAuth context. No need to console.error here.
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const fillDemoCredentials = (type: "admin" | "luiz") => {
+    clearError(); // Clear any existing errors
     if (type === "admin") {
       setFormData({
         email: "admin@portfolio.com",
@@ -74,7 +84,7 @@ export default function LoginPage() {
     }
   };
 
-  // Mostrar loading durante verificação inicial
+  // Show global loading state if AuthContext is still checking authentication
   if (authState.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
@@ -86,18 +96,20 @@ export default function LoginPage() {
     );
   }
 
-  // Se já autenticado, não mostrar formulário
-  if (authState.isAuthenticated) {
+  // If already authenticated but not showing success animation (e.g. initial load), show a brief message
+  // This state is mainly for when a user directly navigates to /login while already authenticated.
+  if (authState.isAuthenticated && !showSuccessAnimation) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <p className="text-white text-lg">Já autenticado! Redirecionando...</p>
+          <p className="text-white text-lg">Você já está logado. Redirecionando...</p>
         </div>
       </div>
     );
   }
 
+  // Main login form
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 pt-20">
       <motion.div
@@ -109,32 +121,32 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <motion.div
-              animate={{ 
-                rotate: loginSuccess ? 0 : 360,
-                scale: loginSuccess ? 1.1 : 1
+              animate={{
+                rotate: showSuccessAnimation ? 0 : 360,
+                scale: showSuccessAnimation ? 1.1 : 1
               }}
-              transition={{ 
-                duration: loginSuccess ? 0.5 : 20, 
-                repeat: loginSuccess ? 0 : Infinity, 
-                ease: loginSuccess ? "easeOut" : "linear" 
+              transition={{
+                duration: showSuccessAnimation ? 0.5 : 20,
+                repeat: showSuccessAnimation ? 0 : Infinity,
+                ease: showSuccessAnimation ? "easeOut" : "linear"
               }}
               className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center"
             >
-              {loginSuccess ? (
+              {showSuccessAnimation ? (
                 <CheckCircle className="w-8 h-8 text-white" />
               ) : (
                 <Shield className="w-8 h-8 text-white" />
               )}
             </motion.div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-              {loginSuccess ? "Login Realizado!" : "Acesso Administrativo"}
+              {showSuccessAnimation ? "Login Realizado!" : "Acesso Administrativo"}
             </h1>
             <p className="text-gray-400 mt-2">
-              {loginSuccess ? "Redirecionando para o painel..." : "Entre para acessar o painel"}
+              {showSuccessAnimation ? "Redirecionando para o painel..." : "Entre para acessar o painel"}
             </p>
           </div>
 
-          {!loginSuccess && (
+          {!showSuccessAnimation && (
             <>
               {/* Demo Credentials */}
               <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
@@ -258,7 +270,7 @@ export default function LoginPage() {
           )}
 
           {/* Success State */}
-          {loginSuccess && (
+          {showSuccessAnimation && ( // Use the new state here
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

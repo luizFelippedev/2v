@@ -1,3 +1,4 @@
+// src/app/admin/layout.tsx
 "use client";
 import { useAuth } from "@/contexts";
 import { useRouter } from "next/navigation";
@@ -21,25 +22,25 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
-    // Só redirecionar após verificação completa de auth
-    if (!authState.isLoading && !authState.isAuthenticated) {
+    // Only redirect if mounted, authState is NOT loading, and isAuthenticated is false
+    if (mounted && !authState.isLoading && !authState.isAuthenticated) {
       router.replace("/login");
     }
-  }, [authState.isAuthenticated, authState.isLoading, router]);
+  }, [authState.isAuthenticated, authState.isLoading, router, mounted]);
 
-  // Não renderizar nada até estar montado (SSR safety)
+  // If not mounted yet (SSR phase for client component), show a simple loading to prevent hydration errors.
   if (!mounted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-16 h-16 text-primary-500 animate-spin mx-auto mb-4" />
-          <p className="text-white text-lg">Carregando...</p>
+          <p className="text-white text-lg">Carregando layout...</p>
         </div>
       </div>
     );
   }
 
-  // Mostrar loading enquanto verifica autenticação
+  // Show loading while authentication check is in progress after client-side mount
   if (authState.isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
@@ -58,8 +59,10 @@ export default function AdminLayout({
     );
   }
 
-  // Mostrar erro se não autenticado
+  // If not authenticated (and isLoading is false), show access denied
   if (!authState.isAuthenticated) {
+    // This case should be mostly handled by the useEffect redirecting to /login,
+    // but remains as a fallback display.
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
         <div className="text-center max-w-md p-8 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10">
@@ -93,7 +96,7 @@ export default function AdminLayout({
     );
   }
 
-  // Verificar se é admin
+  // Check if the authenticated user has the "admin" role
   if (authState.user?.role !== "admin") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
@@ -117,7 +120,7 @@ export default function AdminLayout({
     );
   }
 
-  // Renderizar layout admin se autenticado e admin
+  // Render admin layout if authenticated and is admin
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900">
       <div className="flex">
