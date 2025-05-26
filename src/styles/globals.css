@@ -1,420 +1,403 @@
+/* src/styles/globals.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --color-primary: 14 165 233;
-    --color-secondary: 139 92 246;
-  }
+/* Importar estilos de tema */
+@import './themes.css';
 
-  html {
-    @apply scroll-smooth;
-  }
-
-  body {
-    @apply bg-gray-900 text-gray-100 antialiased;
-  }
+/* Reset e configurações base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@layer components {
-  .glass-effect {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20;
-  }
-
-  .gradient-border {
-    @apply relative before:absolute before:inset-0 before:-z-10 before:p-[1px] before:bg-gradient-to-r before:from-primary-500 before:to-secondary-500 before:rounded-[inherit] before:content-[''];
-  }
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-@layer utilities {
-  .mask-gradient-down {
-    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
-  }
-
-  .mask-gradient-up {
-    mask-image: linear-gradient(to top, black 0%, transparent 100%);
-  }
-
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-}
-
-/* Customizações Scrollbar */
-::-webkit-scrollbar {
-  @apply w-2;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-gray-800;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full hover:bg-gray-500 transition-colors;
-}
-
-/* Estilos para seleção de texto */
-::selection {
-  @apply bg-primary-500/30 text-white;
-}
-
-/* CSS Variables para temas */
-:root {
-  /* Tema padrão (dark) */
-  --color-primary: #60a5fa;
-  --color-secondary: #a78bfa;
-  --color-accent: #fbbf24;
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-text: #f8fafc;
-
-  /* Animações */
-  --animation-duration: 0.3s;
-  --transition-duration: 0.2s;
-}
-
-/* Tema Light */
-.theme-light {
-  --color-primary: #3b82f6;
-  --color-secondary: #8b5cf6;
-  --color-accent: #f59e0b;
-  --color-background: #ffffff;
-  --color-surface: #f8fafc;
-  --color-text: #1f2937;
-}
-
-/* Tema Dark */
-.theme-dark {
-  --color-primary: #60a5fa;
-  --color-secondary: #a78bfa;
-  --color-accent: #fbbf24;
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-text: #f8fafc;
-}
-
-/* Tema Cyberpunk */
-.theme-cyberpunk {
-  --color-primary: #00ffff;
-  --color-secondary: #ff00ff;
-  --color-accent: #ffff00;
-  --color-background: #0a0a0a;
-  --color-surface: #1a1a2e;
-  --color-text: #00ffff;
-}
-
-/* Tema Neon */
-.theme-neon {
-  --color-primary: #ff0080;
-  --color-secondary: #8000ff;
-  --color-accent: #00ff80;
-  --color-background: #000000;
-  --color-surface: #111111;
-  --color-text: #ffffff;
-}
-
-/* Tema Matrix */
-.theme-matrix {
-  --color-primary: #00ff41;
-  --color-secondary: #008f11;
-  --color-accent: #41ff00;
-  --color-background: #000000;
-  --color-surface: #001100;
-  --color-text: #00ff41;
-}
-
-/* Body styling */
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  transition:
-    background-color var(--transition-duration) ease,
-    color var(--transition-duration) ease;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  overflow-x: hidden;
 }
 
-/* Desabilitar animações quando necessário */
-.no-animations *,
-.no-animations *::before,
-.no-animations *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
+/* Prevenção de FOUC (Flash of Unstyled Content) */
+.theme-loading {
+  visibility: hidden;
 }
 
-/* Classes utilitárias para temas */
+.theme-loaded {
+  visibility: visible;
+}
+
+/* Utilities personalizadas com variáveis de tema */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Cores de texto */
+  .text-theme {
+    color: var(--color-text);
   }
-
-  /* Cores usando variáveis CSS */
+  
+  .text-theme-secondary {
+    color: var(--color-text-secondary);
+  }
+  
   .text-theme-primary {
     color: var(--color-primary);
   }
-
-  .text-theme-secondary {
-    color: var(--color-secondary);
-  }
-
+  
   .text-theme-accent {
     color: var(--color-accent);
   }
 
+  /* Cores de fundo */
+  .bg-theme {
+    background-color: var(--color-background);
+  }
+  
+  .bg-theme-surface {
+    background-color: var(--color-surface);
+  }
+  
   .bg-theme-primary {
     background-color: var(--color-primary);
   }
-
+  
   .bg-theme-secondary {
     background-color: var(--color-secondary);
   }
 
-  .bg-theme-surface {
-    background-color: var(--color-surface);
+  /* Bordas */
+  .border-theme {
+    border-color: var(--color-border);
   }
-
+  
   .border-theme-primary {
     border-color: var(--color-primary);
   }
 
-  /* Gradientes temáticos */
-  .gradient-theme-primary {
-    background: linear-gradient(
-      135deg,
-      var(--color-primary),
-      var(--color-secondary)
-    );
+  /* Gradientes */
+  .gradient-theme {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  }
+  
+  .gradient-theme-reverse {
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
   }
 
-  .gradient-theme-text {
+  /* Glass effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .theme-light .glass {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Efeitos de brilho para temas futuristas */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.5);
+  }
+  
+  .glow-secondary {
+    box-shadow: 0 0 20px rgba(var(--color-secondary-rgb), 0.5);
+  }
+  
+  /* Hover effects */
+  .hover-lift {
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Focus effects */
+  .focus-theme {
+    transition: all var(--transition-fast);
+  }
+  
+  .focus-theme:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-color: var(--color-primary);
+  }
+
+  /* Animation utilities */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out;
+  }
+
+  /* Loading states */
+  .loading-shimmer {
     background: linear-gradient(
-      135deg,
-      var(--color-primary),
-      var(--color-secondary)
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
     );
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
   }
 }
 
-/* Scrollbar customizada */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 4px;
-  opacity: 0.5;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  opacity: 0.7;
-}
-
-/* Animações customizadas */
+/* Keyframes */
 @keyframes float {
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-20px);
+    transform: translateY(-10px);
   }
 }
 
-@keyframes glow {
-  0% {
-    box-shadow:
-      0 0 5px var(--color-primary),
-      0 0 10px var(--color-primary),
-      0 0 15px var(--color-primary);
+@keyframes pulse-glow {
+  from {
+    box-shadow: 0 0 5px var(--color-primary);
   }
-  100% {
-    box-shadow:
-      0 0 10px var(--color-primary),
-      0 0 20px var(--color-primary),
-      0 0 30px var(--color-primary);
+  to {
+    box-shadow: 0 0 20px var(--color-primary), 0 0 30px var(--color-primary);
   }
 }
 
-@keyframes pulse-theme {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes matrix-rain {
-  0% {
-    transform: translateY(-100vh);
+@keyframes slide-up {
+  from {
     opacity: 0;
+    transform: translateY(30px);
   }
-  10% {
+  to {
     opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
+    transform: translateY(0);
   }
 }
 
-@keyframes cyberpunk-flicker {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  75% {
-    opacity: 0.9;
-  }
-}
-
-@keyframes neon-glow {
-  0%,
-  100% {
-    text-shadow:
-      0 0 5px var(--color-primary),
-      0 0 10px var(--color-primary),
-      0 0 15px var(--color-primary);
-  }
-  50% {
-    text-shadow:
-      0 0 10px var(--color-primary),
-      0 0 20px var(--color-primary),
-      0 0 30px var(--color-primary);
-  }
-}
-
-/* Classes de animação */
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
-}
-
-.animate-pulse-theme {
-  animation: pulse-theme 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-matrix-rain {
-  animation: matrix-rain 3s linear infinite;
-}
-
-.animate-cyberpunk-flicker {
-  animation: cyberpunk-flicker 0.15s infinite;
-}
-
-.animate-neon-glow {
-  animation: neon-glow 1.5s ease-in-out infinite alternate;
-}
-
-/* Glass effect */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glass-enabled .glass {
-  backdrop-filter: blur(10px);
-}
-
-.glass-disabled .glass {
-  backdrop-filter: none;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-/* Temas específicos - efeitos especiais */
-.theme-cyberpunk .glass {
-  background: rgba(0, 255, 255, 0.1);
-  border: 1px solid rgba(0, 255, 255, 0.3);
-}
-
-.theme-neon .glass {
-  background: rgba(255, 0, 128, 0.1);
-  border: 1px solid rgba(255, 0, 128, 0.3);
-}
-
-.theme-matrix .glass {
-  background: rgba(0, 255, 65, 0.1);
-  border: 1px solid rgba(0, 255, 65, 0.3);
-}
-
-/* Efeitos específicos por tema */
-.theme-cyberpunk * {
-  font-family: "Courier New", monospace;
-}
-
-.theme-matrix .text-theme-primary {
-  animation: neon-glow 2s ease-in-out infinite alternate;
-}
-
-.theme-neon .text-theme-primary {
-  text-shadow: 0 0 10px var(--color-primary);
-}
-
-/* Transições suaves */
-* {
-  transition-duration: var(--transition-duration);
-}
-
-/* Loading states */
-.loading-skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--color-surface) 25%,
-    rgba(255, 255, 255, 0.1) 50%,
-    var(--color-surface) 75%
-  );
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
+@keyframes shimmer {
   0% {
-    background-position: 200% 0;
-  }
-  100% {
     background-position: -200% 0;
   }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Componentes específicos */
+
+/* Cards */
+.theme-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.theme-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Botões */
+.btn-theme {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.btn-theme:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-theme:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Inputs */
+.input-theme {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  color: var(--color-text);
+  transition: all var(--transition-normal);
+}
+
+.input-theme:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.input-theme::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.theme-light .input-theme {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-background);
+}
+
+/* Seleção de texto */
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+::-moz-selection {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+/* Efeitos especiais para temas futuristas */
+.theme-cyberpunk,
+.theme-neon,
+.theme-matrix {
+  /* Scanlines effect */
+  position: relative;
+}
+
+.theme-cyberpunk::before,
+.theme-neon::before,
+.theme-matrix::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    transparent 50%, 
+    rgba(0, 255, 0, 0.02) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.1;
+}
+
+/* Glitch effect para temas futuristas */
+.glitch-text {
+  position: relative;
+}
+
+.theme-cyberpunk .glitch-text:hover,
+.theme-neon .glitch-text:hover,
+.theme-matrix .glitch-text:hover {
+  animation: glitch 0.3s;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+/* Layout responsivo */
+@media (max-width: 768px) {
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+}
+
+/* Otimizações de performance */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Transições suaves para mudança de tema */
+.theme-transition * {
+  transition: 
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+/* Prevent flash durante mudança de tema */
+.theme-changing {
+  transition: none !important;
+}
+
+.theme-changing * {
+  transition: none !important;
 }
 
 /* Print styles */
 @media print {
-  .no-print {
-    display: none !important;
-  }
-
   * {
     background: white !important;
     color: black !important;
   }
-}
-
-/* Adicionar fonte Inter localmente */
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/inter-var.woff2') format('woff2');
-  font-weight: 100 900;
-  font-display: swap;
 }

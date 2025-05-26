@@ -1,0 +1,268 @@
+/* src/styles/themes.css */
+
+/* Variáveis CSS base */
+:root {
+  /* Cores padrão (dark theme) */
+  --color-primary: #60a5fa;
+  --color-secondary: #a78bfa;
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-border: #334155;
+  --color-accent: #fbbf24;
+  
+  /* Gradientes */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  --gradient-surface: linear-gradient(135deg, var(--color-surface), rgba(255,255,255,0.05));
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Bordas */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  
+  /* Transições */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* Tema Escuro (padrão) */
+.theme-dark {
+  --color-primary: #60a5fa;
+  --color-secondary: #a78bfa;
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-border: #334155;
+  --color-accent: #fbbf24;
+}
+
+/* Tema Claro */
+.theme-light {
+  --color-primary: #3b82f6;
+  --color-secondary: #8b5cf6;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+  --color-accent: #f59e0b;
+  
+  /* Sombras para tema claro */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+/* Tema Cyberpunk */
+.theme-cyberpunk {
+  --color-primary: #00ffff;
+  --color-secondary: #ff00ff;
+  --color-background: #0a0a0a;
+  --color-surface: #1a1a1a;
+  --color-text: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-border: #333333;
+  --color-accent: #ffff00;
+  
+  /* Efeitos especiais cyberpunk */
+  --glow-primary: 0 0 20px rgba(0, 255, 255, 0.5);
+  --glow-secondary: 0 0 20px rgba(255, 0, 255, 0.5);
+  --glow-accent: 0 0 20px rgba(255, 255, 0, 0.5);
+}
+
+/* Tema Neon */
+.theme-neon {
+  --color-primary: #ff0080;
+  --color-secondary: #8000ff;
+  --color-background: #000000;
+  --color-surface: #111111;
+  --color-text: #ffffff;
+  --color-text-secondary: #dddddd;
+  --color-border: #444444;
+  --color-accent: #00ff80;
+  
+  /* Efeitos neon */
+  --glow-primary: 0 0 30px rgba(255, 0, 128, 0.6);
+  --glow-secondary: 0 0 30px rgba(128, 0, 255, 0.6);
+  --glow-accent: 0 0 30px rgba(0, 255, 128, 0.6);
+}
+
+/* Tema Matrix */
+.theme-matrix {
+  --color-primary: #00ff41;
+  --color-secondary: #008f11;
+  --color-background: #000000;
+  --color-surface: #001100;
+  --color-text: #00ff41;
+  --color-text-secondary: #00cc33;
+  --color-border: #004400;
+  --color-accent: #55ff55;
+  
+  /* Efeito matrix */
+  --glow-primary: 0 0 20px rgba(0, 255, 65, 0.5);
+  --glow-secondary: 0 0 20px rgba(0, 143, 17, 0.5);
+  --glow-accent: 0 0 20px rgba(85, 255, 85, 0.5);
+}
+
+/* Classes utilitárias para cores do tema */
+.bg-theme-background { background-color: var(--color-background); }
+.bg-theme-surface { background-color: var(--color-surface); }
+.bg-theme-primary { background-color: var(--color-primary); }
+.bg-theme-secondary { background-color: var(--color-secondary); }
+
+.text-theme-primary { color: var(--color-text); }
+.text-theme-secondary { color: var(--color-text-secondary); }
+.text-theme-accent { color: var(--color-accent); }
+
+.border-theme { border-color: var(--color-border); }
+.border-theme-primary { border-color: var(--color-primary); }
+
+/* Gradientes utilitários */
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-surface {
+  background: var(--gradient-surface);
+}
+
+/* Efeitos especiais para temas futuristas */
+.theme-cyberpunk .glow-primary,
+.theme-neon .glow-primary,
+.theme-matrix .glow-primary {
+  box-shadow: var(--glow-primary);
+}
+
+.theme-cyberpunk .glow-secondary,
+.theme-neon .glow-secondary,
+.theme-matrix .glow-secondary {
+  box-shadow: var(--glow-secondary);
+}
+
+.theme-cyberpunk .glow-accent,
+.theme-neon .glow-accent,
+.theme-matrix .glow-accent {
+  box-shadow: var(--glow-accent);
+}
+
+/* Animações para temas futuristas */
+.theme-cyberpunk .animate-glow,
+.theme-neon .animate-glow,
+.theme-matrix .animate-glow {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    box-shadow: var(--glow-primary);
+  }
+  to {
+    box-shadow: var(--glow-primary), var(--glow-primary);
+  }
+}
+
+/* Backdrop blur com tema */
+.backdrop-theme {
+  backdrop-filter: blur(16px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.theme-light .backdrop-theme {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Componentes específicos do tema */
+.theme-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.theme-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.theme-cyberpunk .theme-card:hover,
+.theme-neon .theme-card:hover,
+.theme-matrix .theme-card:hover {
+  box-shadow: var(--glow-primary), var(--shadow-lg);
+}
+
+/* Botões com tema */
+.theme-button {
+  background: var(--gradient-primary);
+  color: var(--color-text);
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.theme-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.theme-cyberpunk .theme-button:hover,
+.theme-neon .theme-button:hover,
+.theme-matrix .theme-button:hover {
+  box-shadow: var(--glow-primary), var(--shadow-lg);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Seleção de texto */
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+/* Focus states */
+.theme-focus:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Transições suaves para mudança de tema */
+* {
+  transition: background-color var(--transition-normal), 
+              border-color var(--transition-normal),
+              color var(--transition-normal),
+              box-shadow var(--transition-normal);
+}
+
+/* Desabilitar transições durante mudança de tema */
+.theme-transitioning * {
+  transition: none !important;
+}
