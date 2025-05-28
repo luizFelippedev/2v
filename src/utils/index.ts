@@ -394,8 +394,8 @@ export const localStorage = {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      // Silently fail
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
     }
   },
 
@@ -403,8 +403,8 @@ export const localStorage = {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.removeItem(key);
-    } catch {
-      // Silently fail
+    } catch (error) {
+      console.error('Error removing from localStorage:', error);
     }
   },
 
@@ -412,10 +412,10 @@ export const localStorage = {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.clear();
-    } catch {
-      // Silently fail
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
     }
-  },
+  }
 };
 
 /**

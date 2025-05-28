@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,7 +16,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false); // New state for animation
-  const { state: authState, login, clearError } = useAuth();
+  const { state: authState, login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get('callbackUrl') || '/admin';
@@ -39,14 +40,15 @@ export default function LoginPage() {
   // Clear error when user types
   useEffect(() => {
     if (authState.error && (formData.email !== "" || formData.password !== "")) {
-      clearError();
+      setError(null); // Usar setError local ao invés de clearAuthError
     }
-  }, [formData.email, formData.password, clearError, authState.error]);
+  }, [formData.email, formData.password, authState.error]);
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(null); // Limpar erro quando o usuário digita
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,22 +56,34 @@ export default function LoginPage() {
     if (isSubmitting) return;
 
     setIsSubmitting(true);
-    setShowSuccessAnimation(false); // Reset animation state on new submission
+    setShowSuccessAnimation(false);
+    setError(null); // Limpa qualquer erro anterior
 
     try {
       const success = await login(formData.email, formData.password);
       if (success) {
-        setShowSuccessAnimation(true); // Trigger success animation and subsequent redirect via useEffect
+        setShowSuccessAnimation(true);
+      } else {
+        // Se o login retornar false, setamos um erro genérico
+        setError("Credenciais inválidas. Por favor, tente novamente.");
       }
     } catch (error) {
-      // Error handling is managed by useAuth context. No need to console.error here.
+      // Tratamento de erro mais específico
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.";
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const fillDemoCredentials = (type: "admin" | "luiz") => {
-    clearError(); // Clear any existing errors
+    clearError(); // Agora a função existe
     if (type === "admin") {
       setFormData({
         email: "admin@portfolio.com",
@@ -222,14 +236,14 @@ export default function LoginPage() {
                   </div>
 
                   {/* Error Message */}
-                  {authState.error && (
+                  {(error || authState.error) && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="flex items-center space-x-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-3"
                     >
                       <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      <span>{authState.error}</span>
+                      <span>{error || authState.error}</span>
                     </motion.div>
                   )}
 

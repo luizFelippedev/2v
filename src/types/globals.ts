@@ -619,20 +619,6 @@ declare module "react" {
 // Export types for easier importing
 
 
-// Re-export commonly used React types
-export type {
-  ReactNode,
-  ReactElement,
-  ComponentType,
-  FC,
-  PropsWithChildren,
-  RefObject,
-  MutableRefObject,
-  CSSProperties,
-} from "react";
-
-export {};
-
 // Additional utility types for specific use cases
 export type ProjectStatus = Project["status"];
 export type ProjectCategory = Project["category"];
@@ -682,3 +668,9 @@ export const THEME_MODES = {
   NEON: "neon",
   MATRIX: "matrix",
 } as const;
+
+export type AuthContextType = {
+  state: AuthState;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+};

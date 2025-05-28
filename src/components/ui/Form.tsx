@@ -5,7 +5,7 @@ import { UseFormRegister, FieldValues, FieldErrors } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
 
-interface FormFieldProps {
+export interface FormFieldProps {
   label: string;
   name: string;
   type?: string;
@@ -75,10 +75,12 @@ export const FormField: React.FC<FormFieldProps> = ({
             className="flex items-center space-x-1 mt-1 text-red-400 text-sm"
           >
             <AlertCircle className="w-4 h-4" />
-            <span>{error.message as string}</span>
+            <span>{error?.message as string}</span>
           </motion.div>
         )}
       </div>
     </div>
   );
 };
+
+export default FormField;

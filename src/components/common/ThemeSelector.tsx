@@ -1,10 +1,9 @@
 // src/components/common/ThemeSelector.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Palette, 
-  Monitor, 
   Moon, 
   Sun, 
   Zap, 
@@ -15,8 +14,9 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts";
 
+// Remover type Theme duplicado e usar o tipo do contexto
 interface ThemeOption {
-  id: string;
+  id: "light" | "dark" | "cyberpunk" | "neon" | "matrix";
   name: string;
   icon: React.ReactNode;
   colors: {
@@ -27,11 +27,12 @@ interface ThemeOption {
   description: string;
 }
 
-export const ThemeSelector: React.FC = () => {
+export const ThemeSelector: React.FC = React.memo(() => {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setThemeMode } = useTheme();
 
-  const themes: ThemeOption[] = [
+  // Memoizar temas para evitar recriação a cada render
+  const themes = useMemo<ThemeOption[]>(() => [
     { 
       id: "dark", 
       name: "Escuro", 
@@ -87,17 +88,17 @@ export const ThemeSelector: React.FC = () => {
       },
       description: "Estilo Matrix verde"
     },
-  ];
+  ], []);
 
-  const currentTheme = themes.find(t => t.id === theme) || themes[0];
+  // Memoizar tema atual
+  const currentTheme = useMemo(() => 
+    themes.find(t => t.id === theme.mode) || themes[0]
+  , [theme.mode, themes]);
 
-  const handleThemeChange = (themeId: string) => {
-    // Por enquanto só alterna entre dark/light já que o contexto só suporta isso
-    if (themeId !== theme) {
-      toggleTheme();
-    }
+  const handleThemeChange = React.useCallback((themeId: ThemeOption['id']) => {
+    setThemeMode(themeId);
     setIsOpen(false);
-  };
+  }, [setThemeMode]);
 
   return (
     <div className="fixed bottom-6 right-6 z-40">
@@ -169,7 +170,7 @@ export const ThemeSelector: React.FC = () => {
 
               <div className="space-y-3">
                 {themes.slice(0, 2).map((themeOption, index) => { // Só mostra dark/light por enquanto
-                  const isSelected = themeOption.id === theme;
+                  const isSelected = themeOption.id === theme.mode; // Corrigido: comparar com theme.mode
                   
                   return (
                     <motion.button
@@ -292,4 +293,6 @@ export const ThemeSelector: React.FC = () => {
       </AnimatePresence>
     </div>
   );
-};
+});
+
+ThemeSelector.displayName = 'ThemeSelector';

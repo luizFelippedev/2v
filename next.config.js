@@ -61,18 +61,28 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' data: https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "worker-src 'self'",
-              "manifest-src 'self'"
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: http:",
+              "connect-src 'self' http://localhost:5001 ws://localhost:5001 ws://localhost:3000",
+              "font-src 'self' data:",
+              "frame-src 'self'",
+              "media-src 'self'"
             ].join('; ')
           }
         ]
       }
-    ];
+    ]
+  },
+
+  // Adicionar proxy para o backend
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:5001/api/:path*'
+      }
+    ]
   },
   
   // Configurações de webpack (se necessário)
@@ -102,17 +112,6 @@ const nextConfig = {
       //   source: '/old-page',
       //   destination: '/new-page',
       //   permanent: true,
-      // },
-    ];
-  },
-  
-  // Configurações de rewrites (se necessário)
-  async rewrites() {
-    return [
-      // Exemplo de rewrite para API
-      // {
-      //   source: '/api/:path*',
-      //   destination: 'http://localhost:8000/api/:path*',
       // },
     ];
   },
