@@ -16,7 +16,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useDebouncedState } from "@/hooks";
+import { useDebouncedState } from "@/hooks/useDebouncedState";
 
 interface SearchResult {
   id: string;

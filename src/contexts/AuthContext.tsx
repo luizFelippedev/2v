@@ -1,7 +1,10 @@
-// src/contexts/AuthContext.tsx
+// src/contexts/AuthContext.tsx (atualizado)
 "use client";
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { authService, User } from "@/services/auth.service";
+import { ApiService } from "@/services/api.service";
+import { User } from "@/types";
+import { AUTH_STORAGE_KEYS } from "@/constants";
+import { useNotification } from "@/hooks/useNotification";
 
 interface AuthState {
   user: User | null;
@@ -92,6 +95,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const { showNotification } = useNotification();
 
   // Verificar status de autenticação na inicialização
   useEffect(() => {
@@ -100,15 +104,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuthStatus = async () => {
     try {
+      dispatch({ type: "AUTH_START" });
+      
       // Verificar se existe token no localStorage
-      const token = authService.getToken();
+      const token = localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN);
       if (!token) {
         dispatch({ type: "AUTH_FAILED" });
         return;
       }
 
       // Verificar se o token é válido
-      const response = await authService.verifyToken();
+      const response = await ApiService.verifyToken();
       
       if (response.success) {
         dispatch({
@@ -128,37 +134,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: "AUTH_START" });
 
-      const response = await authService.login({ email, password });
+      const response = await ApiService.login({ email, password });
 
       if (response.success) {
+        // Salvar dados no localStorage
+        localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, response.data.token);
+        localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(response.data.user));
+        
         dispatch({
           type: "AUTH_SUCCESS",
           payload: { user: response.data.user },
         });
+        
+        showNotification('Login realizado com sucesso', 'success');
         return true;
       } else {
         dispatch({
           type: "AUTH_ERROR",
           payload: response.message || "Credenciais inválidas",
         });
+        
+        showNotification('Erro ao fazer login: ' + response.message, 'error');
         return false;
       }
     } catch (error: any) {
-      const errorMessage = error.message || "Erro ao fazer login";
+      const errorMessage = error.response?.data?.message || error.message || "Erro ao fazer login";
       dispatch({
         type: "AUTH_ERROR",
         payload: errorMessage,
       });
+      
+      showNotification('Erro ao fazer login: ' + errorMessage, 'error');
       return false;
     }
   };
 
   const logout = async () => {
     try {
-      await authService.logout();
+      await ApiService.logout();
+      // Limpar localStorage
+      localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(AUTH_STORAGE_KEYS.USER);
+      
+      dispatch({ type: "LOGOUT" });
+      showNotification('Logout realizado com sucesso', 'success');
     } catch (error) {
       console.error("Logout error:", error);
-    } finally {
+      
+      // Mesmo com erro, limpar dados locais
+      localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(AUTH_STORAGE_KEYS.USER);
+      
       dispatch({ type: "LOGOUT" });
     }
   };

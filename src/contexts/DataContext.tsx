@@ -1,5 +1,9 @@
+// src/contexts/DataContext.tsx (atualizado)
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { ApiService } from "@/services/api.service";
+import { useNotification } from "@/hooks/useNotification";
+import { Project, Certificate } from "@/types";
 import {
   FaReact,
   FaNodeJs,
@@ -35,42 +39,17 @@ interface Technology {
     | "design";
 }
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  longDescription: string;
-  technologies: Technology[];
-  images: string[];
-  liveUrl?: string;
-  githubUrl?: string;
-  category: string;
-  featured: boolean;
-  status: "completed" | "in-progress" | "planned";
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface Certificate {
-  id: string;
-  title: string;
-  issuer: string;
-  issueDate: Date;
-  expiryDate?: Date;
-  credentialUrl?: string;
-  image?: string;
-  description: string;
-  skills: string[];
-  featured: boolean;
-  createdAt: Date;
-}
-
 interface DataContextType {
   projects: Project[];
   certificates: Certificate[];
   isLoading: boolean;
+  error: string | null;
   setProjects: (projects: Project[]) => void;
   setCertificates: (certificates: Certificate[]) => void;
+  fetchProjects: (params?: any) => Promise<void>;
+  fetchCertificates: (params?: any) => Promise<void>;
+  fetchFeaturedProjects: () => Promise<void>;
+  fetchProjectBySlug: (slug: string) => Promise<Project | null>;
   addProject: (project: Project) => void;
   updateProject: (id: string, updates: Partial<Project>) => void;
   deleteProject: (id: string) => void;
@@ -88,6 +67,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [projects, setProjects] = useState<Project[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { showNotification } = useNotification();
 
   const technologyIcons: DataContextType["technologyIcons"] = {
     React: { icon: <FaReact />, color: "#61DAFB" },
@@ -109,6 +90,109 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     Firebase: { icon: <SiFirebase />, color: "#FFCA28" },
     "Next.js": { icon: <SiNextdotjs />, color: "#000000" },
     "Nuxt.js": { icon: <SiNuxtdotjs />, color: "#00C58E" },
+  };
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    fetchProjects();
+    fetchCertificates();
+  }, []);
+
+  // Buscar projetos
+  const fetchProjects = async (params?: any) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await ApiService.getProjects(params);
+      
+      if (response.success) {
+        setProjects(response.data.projects || []);
+      } else {
+        setError(response.message || "Erro ao buscar projetos");
+        showNotification("Erro ao buscar projetos", "error");
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Erro ao buscar projetos";
+      setError(errorMessage);
+      showNotification(errorMessage, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Buscar certificados
+  const fetchCertificates = async (params?: any) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await ApiService.getCertificates(params);
+      
+      if (response.success) {
+        setCertificates(response.data || []);
+      } else {
+        setError(response.message || "Erro ao buscar certificados");
+        showNotification("Erro ao buscar certificados", "error");
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Erro ao buscar certificados";
+      setError(errorMessage);
+      showNotification(errorMessage, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Buscar projetos em destaque
+  const fetchFeaturedProjects = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await ApiService.getFeaturedProjects();
+      
+      if (response.success) {
+        setProjects(response.data.projects || []);
+        return response.data.projects;
+      } else {
+        setError(response.message || "Erro ao buscar projetos em destaque");
+        showNotification("Erro ao buscar projetos em destaque", "error");
+        return [];
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Erro ao buscar projetos em destaque";
+      setError(errorMessage);
+      showNotification(errorMessage, "error");
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Buscar projeto por slug
+  const fetchProjectBySlug = async (slug: string): Promise<Project | null> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await ApiService.getProjectBySlug(slug);
+      
+      if (response.success) {
+        return response.data.project || null;
+      } else {
+        setError(response.message || "Erro ao buscar projeto");
+        showNotification("Erro ao buscar projeto", "error");
+        return null;
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Erro ao buscar projeto";
+      setError(errorMessage);
+      showNotification(errorMessage, "error");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const addProject = (project: Project) =>
@@ -137,8 +221,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     projects,
     certificates,
     isLoading,
+    error,
     setProjects,
     setCertificates,
+    fetchProjects,
+    fetchCertificates,
+    fetchFeaturedProjects,
+    fetchProjectBySlug,
     addProject,
     updateProject,
     deleteProject,

@@ -20,7 +20,7 @@ import {
   Heart,
 } from "lucide-react";
 import Link from "next/link";
-import { useParticles } from "@/hooks";
+import { useParticles } from "@/hooks/useParticles";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 // Optimized Typed Text Component

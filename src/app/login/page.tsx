@@ -1,313 +1,110 @@
 // src/app/login/page.tsx
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Eye, EyeOff, AlertCircle, LogIn, CheckCircle, Loader, Shield } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotification } from '@/hooks/useNotification';
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false); // New state for animation
-  const { state: authState, login } = useAuth();
+  const { state, login, clearError } = useAuth();
+  const { showNotification } = useNotification();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get('callbackUrl') || '/admin';
 
-  // Effect to handle redirection after authentication status is determined
+  // Redirecionar se já estiver autenticado
   useEffect(() => {
-    // Redireciona imediatamente se já autenticado e não está mostrando animação de sucesso
-    if (!authState.isLoading && authState.isAuthenticated && !showSuccessAnimation) {
-      router.replace(callbackUrl);
-      return;
+    if (state.isAuthenticated) {
+      router.push('/admin/dashboard');
     }
-    // Se login acabou de acontecer, mostra animação e redireciona após 1.5s
-    if (showSuccessAnimation) {
-      const timer = setTimeout(() => {
-        router.replace(callbackUrl);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [authState.isAuthenticated, authState.isLoading, router, callbackUrl, showSuccessAnimation]);
+  }, [state.isAuthenticated, router]);
 
-  // Clear error when user types
+  // Limpar erro ao desmontar componente
   useEffect(() => {
-    if (authState.error && (formData.email !== "" || formData.password !== "")) {
-      setError(null); // Usar setError local ao invés de clearAuthError
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
+
+  // Exibir erro de autenticação
+  useEffect(() => {
+    if (state.error) {
+      showNotification(state.error, 'error');
     }
-  }, [formData.email, formData.password, authState.error]);
-
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setError(null); // Limpar erro quando o usuário digita
-  };
+  }, [state.error, showNotification]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
-
+    
+    if (!email || !password) {
+      showNotification('Por favor, preencha todos os campos', 'warning');
+      return;
+    }
+    
     setIsSubmitting(true);
-    setShowSuccessAnimation(false);
-    setError(null); // Limpa qualquer erro anterior
-
+    
     try {
-      const success = await login(formData.email, formData.password);
+      const success = await login(email, password);
+      
       if (success) {
-        setShowSuccessAnimation(true);
-      } else {
-        // Se o login retornar false, setamos um erro genérico
-        setError("Credenciais inválidas. Por favor, tente novamente.");
+        router.push('/admin/dashboard');
       }
-    } catch (error) {
-      // Tratamento de erro mais específico
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.";
-      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const clearError = () => {
-    setError(null);
-  };
-
-  const fillDemoCredentials = (type: "admin" | "luiz") => {
-    clearError(); // Agora a função existe
-    if (type === "admin") {
-      setFormData({
-        email: "admin@portfolio.com",
-        password: "admin123",
-      });
-    } else {
-      setFormData({
-        email: "luizfelippeandrade@outlook.com",
-        password: "123456",
-      });
-    }
-  };
-
-  // Show global loading state if AuthContext is still checking authentication
-  if (authState.isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-        <div className="text-center">
-          <Loader className="w-16 h-16 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-white text-lg">Verificando autenticação...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If already authenticated but not showing success animation (e.g. initial load), show a brief message
-  // This state is mainly for when a user directly navigates to /login while already authenticated.
-  if (authState.isAuthenticated && !showSuccessAnimation) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-        <div className="text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <p className="text-white text-lg">Você já está logado. Redirecionando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Main login form
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 pt-20">
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="w-full max-w-md"
-      >
-        <div className="bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-2xl">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <motion.div
-              animate={{
-                rotate: showSuccessAnimation ? 0 : 360,
-                scale: showSuccessAnimation ? 1.1 : 1
-              }}
-              transition={{
-                duration: showSuccessAnimation ? 0.5 : 20,
-                repeat: showSuccessAnimation ? 0 : Infinity,
-                ease: showSuccessAnimation ? "easeOut" : "linear"
-              }}
-              className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center"
-            >
-              {showSuccessAnimation ? (
-                <CheckCircle className="w-8 h-8 text-white" />
-              ) : (
-                <Shield className="w-8 h-8 text-white" />
-              )}
-            </motion.div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-              {showSuccessAnimation ? "Login Realizado!" : "Acesso Administrativo"}
-            </h1>
-            <p className="text-gray-400 mt-2">
-              {showSuccessAnimation ? "Redirecionando para o painel..." : "Entre para acessar o painel"}
-            </p>
+    <div className="flex min-h-screen items-center justify-center bg-theme-background">
+      <div className="w-full max-w-md p-8 space-y-8 rounded-xl bg-theme-surface shadow-lg">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-theme-primary">Login</h1>
+          <p className="mt-2 text-theme-secondary">Acesse o painel administrativo</p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-theme">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 bg-theme-background border border-theme-border rounded-md shadow-sm focus:outline-none focus:ring-theme-primary focus:border-theme-primary"
+            />
           </div>
 
-          {!showSuccessAnimation && (
-            <>
-              {/* Demo Credentials */}
-              <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                <p className="text-sm text-blue-300 mb-3 font-medium">Credenciais de demonstração:</p>
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials("admin")}
-                    className="w-full text-left p-3 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors border border-blue-500/20"
-                  >
-                    <div className="text-xs text-blue-200 font-medium">👨‍💼 Admin</div>
-                    <div className="text-xs text-blue-100">admin@portfolio.com / admin123</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials("luiz")}
-                    className="w-full text-left p-3 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-colors border border-green-500/20"
-                  >
-                    <div className="text-xs text-green-200 font-medium">👨‍💻 Luiz Felippe</div>
-                    <div className="text-xs text-green-100">luizfelippeandrade@outlook.com / 123456</div>
-                  </button>
-                </div>
-              </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-theme">
+              Senha
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 bg-theme-background border border-theme-border rounded-md shadow-sm focus:outline-none focus:ring-theme-primary focus:border-theme-primary"
+            />
+          </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      placeholder="Digite seu email"
-                      required
-                      disabled={isSubmitting}
-                      autoComplete="username"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Senha
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12 transition-all"
-                        placeholder="Digite sua senha"
-                        required
-                        disabled={isSubmitting}
-                        autoComplete="current-password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1"
-                        disabled={isSubmitting}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
-                        ) : (
-                          <Eye className="w-5 h-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Error Message */}
-                  {(error || authState.error) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center space-x-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-3"
-                    >
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      <span>{error || authState.error}</span>
-                    </motion.div>
-                  )}
-
-                  {/* Login Button */}
-                  <motion.button
-                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-3 rounded-xl font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader className="w-5 h-5 animate-spin" />
-                        <span>Entrando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="w-5 h-5" />
-                        <span>Entrar</span>
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-              </form>
-
-              {/* Back to Home */}
-              <div className="mt-6 pt-6 border-t border-white/10 text-center">
-                <Link
-                  href="/"
-                  className="text-gray-400 hover:text-white transition-colors text-sm inline-flex items-center space-x-2"
-                >
-                  <span>← Voltar para o site</span>
-                </Link>
-              </div>
-            </>
-          )}
-
-          {/* Success State */}
-          {showSuccessAnimation && ( // Use the new state here
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-8"
+          <div>
+            <button
+              type="submit"
+              disabled={isSubmitting || state.isLoading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-theme-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-theme-primary disabled:opacity-50"
             >
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Login realizado com sucesso!
-              </h3>
-              <p className="text-gray-400 mb-4">
-                Redirecionando para o painel administrativo...
-              </p>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 1.5 }}
-                  className="h-2 rounded-full bg-gradient-to-r from-green-500 to-green-400"
-                />
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
+              {isSubmitting || state.isLoading ? 'Entrando...' : 'Entrar'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
